@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "node tools/generate-site.mjs",
+    "serve": "python3 -m http.server 4173"
+  },
+  "dependencies": {
+    "katex": "^0.16.46"
+  }
+}
