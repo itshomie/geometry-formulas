@@ -10,6 +10,7 @@ const brandName = "Geometry Formulas";
 const brandAlternateName = "geometry formulas";
 const companyName = "Blue Core Technologies LLC";
 const contactEmail = "Ding@bluecoretechnologiesllc.com";
+const googleAnalyticsId = "G-MTGR0VENZ1";
 
 const navItems = [
   ["Geometry Formulas", "/"],
@@ -731,6 +732,7 @@ function pageShell(page, body) {
   return `<!doctype html>
 <html lang="en">
 <head>
+  ${googleTag()}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(page.title)}</title>
@@ -808,6 +810,18 @@ function pageShell(page, body) {
   </footer>
 </body>
 </html>`;
+}
+
+function googleTag() {
+  return `<!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', '${googleAnalyticsId}');
+  </script>`;
 }
 
 function organizationSchema() {
@@ -2156,6 +2170,7 @@ async function writeGeometryRedirect() {
   const html = `<!doctype html>
 <html lang="en">
 <head>
+  ${googleTag()}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="0; url=/">
