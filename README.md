@@ -10,10 +10,10 @@ npm run build
 
 The build script writes one `index.html` per URL directory, plus `robots.txt`, `sitemap.xml`, `_redirects`, and a root redirect page.
 
-Before production deployment, set the final domain when regenerating canonical URLs and the sitemap:
+The default production domain is `https://geometry-formulas.com`. If a different canonical domain is needed, set it when regenerating canonical URLs and the sitemap:
 
 ```bash
-SITE_URL="https://your-domain.com" npm run build
+SITE_URL="https://geometry-formulas.com" npm run build
 ```
 
 ## Local Preview

@@ -4,8 +4,10 @@ import { fileURLToPath } from "node:url";
 import katex from "katex";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const siteUrl = (process.env.SITE_URL || "https://geometryformulas.pages.dev").replace(/\/$/, "");
-const lastmod = process.env.LASTMOD || "2026-05-15";
+const siteUrl = (process.env.SITE_URL || "https://geometry-formulas.com").replace(/\/$/, "");
+const lastmod = process.env.LASTMOD || "2026-05-16";
+const brandName = "Geometry Formulas";
+const brandAlternateName = "geometry formulas";
 const companyName = "Blue Core Technologies LLC";
 const contactEmail = "Ding@bluecoretechnologiesllc.com";
 
@@ -686,7 +688,8 @@ function pageShell(page, body) {
       dateModified: lastmod,
       isPartOf: {
         "@type": "WebSite",
-        name: "Geometry Formulas",
+        name: brandName,
+        alternateName: brandAlternateName,
         url: `${siteUrl}/`
       },
       publisher: organizationSchema(),
@@ -698,6 +701,7 @@ function pageShell(page, body) {
       }
     },
     breadcrumbSchema(page),
+    websiteSchema(),
     {
       "@context": "https://schema.org",
       "@type": "ImageObject",
@@ -734,7 +738,7 @@ function pageShell(page, body) {
   <meta name="robots" content="index,follow">
   <meta name="theme-color" content="#137c5a">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Geometry Formulas">
+  <meta property="og:site_name" content="${brandName}">
   <meta property="og:title" content="${escapeHtml(page.title)}">
   <meta property="og:description" content="${escapeHtml(page.description)}">
   <meta property="og:url" content="${absoluteUrl(page.slug)}">
@@ -753,7 +757,7 @@ function pageShell(page, body) {
   <a class="skip-link" href="#content">Skip to content</a>
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="/"><span class="brand-mark">${brandMark()}</span><span>Geometry Formulas</span></a>
+      <a class="brand" href="/"><span class="brand-mark">${brandMark()}</span><span>${brandName}</span></a>
       <nav class="site-nav" aria-label="Primary navigation">
         ${navItems.map(([label, href]) => `<a href="${href}"${href === pageUrl(page.slug) ? " class=\"active\"" : ""}>${label}</a>`).join("")}
       </nav>
@@ -779,7 +783,7 @@ function pageShell(page, body) {
       <nav class="footer-links" aria-label="Footer navigation">
         <div>
           <strong>Learn</strong>
-          <a href="/">Geometry Formulas</a>
+          <a href="/">${brandName}</a>
           <a href="/area-formulas/">Area</a>
           <a href="/volume-formulas/">Volume</a>
           <a href="/surface-area-formulas/">Surface Area</a>
@@ -816,11 +820,23 @@ function organizationSchema() {
   };
 }
 
+function websiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: brandName,
+    alternateName: brandAlternateName,
+    url: `${siteUrl}/`,
+    inLanguage: "en",
+    publisher: organizationSchema()
+  };
+}
+
 function breadcrumbSchema(page) {
   const items = page.slug === "geometry-formulas"
-    ? [{ name: "Geometry Formulas", item: absoluteUrl("geometry-formulas") }]
+    ? [{ name: brandName, item: absoluteUrl("geometry-formulas") }]
     : [
-        { name: "Geometry Formulas", item: absoluteUrl("geometry-formulas") },
+        { name: brandName, item: absoluteUrl("geometry-formulas") },
         { name: page.h1, item: absoluteUrl(page.slug) }
       ];
 
@@ -2171,7 +2187,14 @@ async function writeAssets() {
 }
 
 function redirectsText() {
+  const canonical = new URL(siteUrl);
+  const apexTarget = `${canonical.protocol}//${canonical.host}`;
   const redirects = [
+    [`http://${canonical.host}/*`, `${apexTarget}/:splat`, 301],
+    [`https://www.${canonical.host}/*`, `${apexTarget}/:splat`, 301],
+    [`http://www.${canonical.host}/*`, `${apexTarget}/:splat`, 301],
+    ["https://geometryformulas.pages.dev/*", `${apexTarget}/:splat`, 301],
+    ["https://geometry-formulas.pages.dev/*", `${apexTarget}/:splat`, 301],
     ["/geometry-formulas", "/", 301],
     ["/geometry-formulas/", "/", 301],
     ["/geometry-formulas/index.html", "/", 301],

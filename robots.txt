@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://geometryformulas.pages.dev/sitemap.xml
+Sitemap: https://geometry-formulas.com/sitemap.xml
