@@ -44,7 +44,6 @@ const calculatorLinks = [
 
 const companyLinks = [
   ["About", "/about/"],
-  ["Team & Services", "/team-services/"],
   ["Contact", "/contact/"]
 ];
 
@@ -971,7 +970,6 @@ function infoBody(page, sections) {
 function trustPages() {
   return [
     aboutPage(),
-    teamServicesPage(),
     contactPage(),
     privacyPolicyPage(),
     termsOfUsePage()
@@ -1000,39 +998,7 @@ function aboutPage() {
     },
     {
       title: "Who operates this website",
-      body: `<p>Geometry Formulas is operated by ${companyName}. For questions, corrections, or business inquiries, contact us at <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
-    }
-  ]);
-
-  return { ...page, body };
-}
-
-function teamServicesPage() {
-  const page = {
-    slug: "team-services",
-    h1: "Team & Services",
-    title: "Team & Services | Geometry Formulas",
-    description: "Learn about the Geometry Formulas team, educational content services, calculator planning, and contact information.",
-    intro: "Our work focuses on clear educational content, visual math references, and lightweight web calculators for student learning.",
-    kicker: "Team & Services"
-  };
-
-  const body = infoBody(page, [
-    {
-      title: "Our team focus",
-      body: `<p>The Geometry Formulas team focuses on turning common geometry topics into useful study pages. We prioritize accuracy, clear diagrams, fast pages, and calculators that show the formula and the steps behind each answer.</p>`
-    },
-    {
-      title: "Educational content services",
-      body: `<p>${companyName} can support educational web content planning, formula reference pages, calculator concepts, content structure, and search-focused information architecture for learning websites.</p>`
-    },
-    {
-      title: "What we do not provide",
-      body: `<p>The website does not provide private tutoring, graded homework completion, legal advice, or financial advice. Geometry calculators are educational tools and should be checked against class instructions when precision or rounding rules matter.</p>`
-    },
-    {
-      title: "Service inquiries",
-      body: `<p>For service or partnership inquiries, email <a href="mailto:${contactEmail}">${contactEmail}</a> with a short description of your project, timeline, and website or organization.</p>`
+      body: `<p>Geometry Formulas is operated by ${companyName}. For questions, corrections, or feedback, contact us at <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
     }
   ]);
 
@@ -1044,8 +1010,8 @@ function contactPage() {
     slug: "contact",
     h1: "Contact Geometry Formulas",
     title: "Contact Geometry Formulas",
-    description: "Contact Geometry Formulas for corrections, feedback, advertising questions, service inquiries, or website support.",
-    intro: "Use this page to contact the team about corrections, calculator feedback, partnership questions, or website support.",
+    description: "Contact Geometry Formulas for corrections, calculator feedback, privacy questions, or general site questions.",
+    intro: "Use this page to contact the team about corrections, calculator feedback, privacy questions, or general site questions.",
     kicker: "Contact",
     schemaType: "ContactPage"
   };
@@ -1064,8 +1030,8 @@ function contactPage() {
       body: `<p>We review correction requests for formula accuracy, wording clarity, calculator behavior, and page usability. Educational content may be updated when a correction improves clarity or accuracy for students.</p>`
     },
     {
-      title: "Advertising and privacy questions",
-      body: `<p>For advertising, privacy, or data questions, include “Privacy” or “Advertising” in the email subject so the message can be routed appropriately.</p>`
+      title: "Privacy questions",
+      body: `<p>For privacy or data questions, include “Privacy” in the email subject.</p>`
     }
   ]);
 
@@ -1077,7 +1043,7 @@ function privacyPolicyPage() {
     slug: "privacy-policy",
     h1: "Privacy Policy",
     title: "Privacy Policy | Geometry Formulas",
-    description: "Read the Geometry Formulas privacy policy, including contact information, cookies, analytics, advertising, and data choices.",
+    description: "Read the Geometry Formulas privacy policy, including contact information, cookies, analytics, and data choices.",
     intro: `This Privacy Policy explains how ${companyName} handles information for Geometry Formulas.`,
     kicker: "Policy"
   };
@@ -1096,16 +1062,16 @@ function privacyPolicyPage() {
       body: `<p>When you visit the website, standard technical information may be processed automatically, such as browser type, device information, pages viewed, approximate location derived from IP address, referring pages, and interaction data. If you email us, we receive the information you choose to send.</p>`
     },
     {
-      title: "Cookies, analytics, and advertising",
-      body: `<p>The website may use cookies or similar technologies for site functionality, analytics, performance measurement, and advertising. If Google ads are enabled, Google and its partners may use cookies or identifiers to serve ads, limit repeated ads, measure ad performance, and help show more relevant advertising where permitted.</p><p>You can control cookies through your browser settings. You can also learn about Google advertising controls through Google’s ad settings and privacy tools.</p>`
+      title: "Cookies and analytics",
+      body: `<p>The website may use cookies or similar technologies for site functionality, analytics, and performance measurement. You can control cookies through your browser settings.</p>`
     },
     {
       title: "How information is used",
-      body: `<ul class="info-list"><li>To operate and improve the website.</li><li>To understand which formulas, calculators, and pages are useful.</li><li>To respond to messages sent by email.</li><li>To protect the website from abuse, spam, or technical problems.</li><li>To support advertising, measurement, and compliance when ads are used.</li></ul>`
+      body: `<ul class="info-list"><li>To operate and improve the website.</li><li>To understand which formulas, calculators, and pages are useful.</li><li>To respond to messages sent by email.</li><li>To protect the website from abuse, spam, or technical problems.</li></ul>`
     },
     {
       title: "Third-party services",
-      body: `<p>We may use third-party services for hosting, analytics, security, or advertising. These services may process information according to their own policies. The website is designed as a public educational resource and does not require user accounts.</p>`
+      body: `<p>We may use third-party services for hosting, analytics, or security. These services may process information according to their own policies. The website is designed as a public educational resource and does not require user accounts.</p>`
     },
     {
       title: "Children’s privacy",
@@ -2213,6 +2179,9 @@ function redirectsText() {
     ["/geometry-formulas", "/", 301],
     ["/geometry-formulas/", "/", 301],
     ["/geometry-formulas/index.html", "/", 301],
+    ["/team-services", "/about/", 301],
+    ["/team-services/", "/about/", 301],
+    ["/team-services/index.html", "/about/", 301],
     ["/index.html", "/", 301]
   ];
 
