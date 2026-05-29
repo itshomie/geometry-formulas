@@ -12,10 +12,10 @@ const companyName = "Blue Core Technologies LLC";
 const contactEmailDisplay = "Ding [at] bluecoretechnologiesllc [dot] com";
 const googleAnalyticsId = "G-MTGR0VENZ1";
 const socialImage = {
-  path: "/assets/img/geometry-formulas-og.svg",
+  path: "/assets/img/geometry-formulas-og.png",
   width: 1200,
   height: 630,
-  type: "image/svg+xml",
+  type: "image/png",
   alt: "Geometry Formulas visual reference with formulas and shape diagrams"
 };
 const socialImageUrl = `${siteUrl}${socialImage.path}`;
