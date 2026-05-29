@@ -9,8 +9,16 @@ const lastmod = process.env.LASTMOD || "2026-05-16";
 const brandName = "Geometry Formulas";
 const brandAlternateName = "geometry formulas";
 const companyName = "Blue Core Technologies LLC";
-const contactEmail = "Ding@bluecoretechnologiesllc.com";
+const contactEmailDisplay = "Ding [at] bluecoretechnologiesllc [dot] com";
 const googleAnalyticsId = "G-MTGR0VENZ1";
+const socialImage = {
+  path: "/assets/img/geometry-formulas-og.svg",
+  width: 1200,
+  height: 630,
+  type: "image/svg+xml",
+  alt: "Geometry Formulas visual reference with formulas and shape diagrams"
+};
+const socialImageUrl = `${siteUrl}${socialImage.path}`;
 
 const navItems = [
   ["Geometry Formulas", "/"],
@@ -697,7 +705,9 @@ function pageShell(page, body) {
       isAccessibleForFree: true,
       primaryImageOfPage: {
         "@type": "ImageObject",
-        url: `${siteUrl}/favicon.svg`,
+        url: socialImageUrl,
+        width: socialImage.width,
+        height: socialImage.height,
         caption: `${page.h1} visual formula reference`
       }
     },
@@ -706,7 +716,9 @@ function pageShell(page, body) {
     {
       "@context": "https://schema.org",
       "@type": "ImageObject",
-      url: `${siteUrl}/favicon.svg`,
+      url: socialImageUrl,
+      width: socialImage.width,
+      height: socialImage.height,
       caption: `${page.h1} diagram and formula card`
     },
     organizationSchema()
@@ -744,9 +756,16 @@ function pageShell(page, body) {
   <meta property="og:title" content="${escapeHtml(page.title)}">
   <meta property="og:description" content="${escapeHtml(page.description)}">
   <meta property="og:url" content="${absoluteUrl(page.slug)}">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="${socialImageUrl}">
+  <meta property="og:image:type" content="${socialImage.type}">
+  <meta property="og:image:width" content="${socialImage.width}">
+  <meta property="og:image:height" content="${socialImage.height}">
+  <meta property="og:image:alt" content="${escapeHtml(socialImage.alt)}">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(page.title)}">
   <meta name="twitter:description" content="${escapeHtml(page.description)}">
+  <meta name="twitter:image" content="${socialImageUrl}">
+  <meta name="twitter:image:alt" content="${escapeHtml(socialImage.alt)}">
   <link rel="canonical" href="${absoluteUrl(page.slug)}">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/vendor/katex/katex.min.css">
@@ -780,7 +799,7 @@ function pageShell(page, body) {
     <div class="container footer-grid">
       <div class="footer-about">
         <p><strong>Geometry Formulas & Calculators for Students</strong><br>Fast reference pages, diagrams, and calculators for common geometry homework.</p>
-        <p class="footer-company">Operated by ${companyName}. Contact: <a href="mailto:${contactEmail}">${contactEmail}</a></p>
+        <p class="footer-company">Operated by ${companyName}. <a href="/contact/">Contact us</a></p>
       </div>
       <nav class="footer-links" aria-label="Footer navigation">
         <div>
@@ -829,8 +848,7 @@ function organizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: companyName,
-    url: `${siteUrl}/`,
-    email: contactEmail
+    url: `${siteUrl}/`
   };
 }
 
@@ -960,12 +978,16 @@ function infoBody(page, sections) {
         <aside class="note-panel info-aside">
           <h2>Site Information</h2>
           <p><strong>Operator:</strong><br>${companyName}</p>
-          <p><strong>Email:</strong><br><a href="mailto:${contactEmail}">${contactEmail}</a></p>
+          <p><strong>Email:</strong><br>${contactEmailText()}</p>
           <p><strong>Website:</strong><br><a href="${siteUrl}/">${siteUrl.replace(/^https?:\/\//, "")}</a></p>
         </aside>
       </div>
     </section>
   `;
+}
+
+function contactEmailText() {
+  return `<span class="contact-email">${contactEmailDisplay}</span>`;
 }
 
 function trustPages() {
@@ -1000,7 +1022,7 @@ function aboutPage() {
     },
     {
       title: "Who operates this website",
-      body: `<p>Geometry Formulas is operated by ${companyName}. For questions, corrections, or business inquiries, contact us at <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>Geometry Formulas is operated by ${companyName}. For questions, corrections, or feedback, use the <a href="/contact/">contact page</a>.</p>`
     }
   ]);
 
@@ -1032,7 +1054,7 @@ function teamServicesPage() {
     },
     {
       title: "Service inquiries",
-      body: `<p>For service or partnership inquiries, email <a href="mailto:${contactEmail}">${contactEmail}</a> with a short description of your project, timeline, and website or organization.</p>`
+      body: `<p>For service or partnership inquiries, use the <a href="/contact/">contact page</a> with a short description of your project, timeline, and website or organization.</p>`
     }
   ]);
 
@@ -1053,7 +1075,7 @@ function contactPage() {
   const body = infoBody(page, [
     {
       title: "Email",
-      body: `<p>The best way to reach us is by email: <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>The best way to reach us is by email: ${contactEmailText()}.</p>`
     },
     {
       title: "What to include",
@@ -1089,7 +1111,7 @@ function privacyPolicyPage() {
     },
     {
       title: "Who we are",
-      body: `<p>Geometry Formulas is operated by ${companyName}. You can contact us at <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>Geometry Formulas is operated by ${companyName}. You can contact us through the <a href="/contact/">contact page</a>.</p>`
     },
     {
       title: "Information we may collect",
@@ -1109,11 +1131,11 @@ function privacyPolicyPage() {
     },
     {
       title: "Children’s privacy",
-      body: `<p>Geometry Formulas is an educational website, but it is not designed to collect personal information from children. If you believe a child has sent personal information to us, contact <a href="mailto:${contactEmail}">${contactEmail}</a> so we can review and delete it where appropriate.</p>`
+      body: `<p>Geometry Formulas is an educational website, but it is not designed to collect personal information from children. If you believe a child has sent personal information to us, use the <a href="/contact/">contact page</a> so we can review and delete it where appropriate.</p>`
     },
     {
       title: "Contact",
-      body: `<p>For privacy questions or requests, email <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>For privacy questions or requests, use the <a href="/contact/">contact page</a>.</p>`
     }
   ]);
 
@@ -1153,7 +1175,7 @@ function termsOfUsePage() {
     },
     {
       title: "Changes and contact",
-      body: `<p>We may update these terms as the website changes. Questions about these terms can be sent to <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>We may update these terms as the website changes. Questions about these terms can be sent through the <a href="/contact/">contact page</a>.</p>`
     }
   ]);
 
@@ -2167,6 +2189,8 @@ async function writePage(page) {
 async function writeGeometryRedirect() {
   const dir = path.join(root, "geometry-formulas");
   await mkdir(dir, { recursive: true });
+  const title = "Geometry Formulas";
+  const description = "Geometry Formulas is now served from the homepage with formula tables, visual calculators, step-by-step examples, and practice problems.";
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -2175,9 +2199,24 @@ async function writeGeometryRedirect() {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="0; url=/">
   <meta name="robots" content="noindex, follow">
-  <meta name="description" content="Geometry Formulas is now served from the homepage with formula tables, visual calculators, step-by-step examples, and practice problems.">
+  <meta name="description" content="${description}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="${brandName}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:url" content="${absoluteUrl("geometry-formulas")}">
+  <meta property="og:image" content="${socialImageUrl}">
+  <meta property="og:image:type" content="${socialImage.type}">
+  <meta property="og:image:width" content="${socialImage.width}">
+  <meta property="og:image:height" content="${socialImage.height}">
+  <meta property="og:image:alt" content="${escapeHtml(socialImage.alt)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${socialImageUrl}">
+  <meta name="twitter:image:alt" content="${escapeHtml(socialImage.alt)}">
   <link rel="canonical" href="${absoluteUrl("geometry-formulas")}">
-  <title>Geometry Formulas</title>
+  <title>${title}</title>
 </head>
 <body>
   <p><a href="/">Go to Geometry Formulas</a></p>
