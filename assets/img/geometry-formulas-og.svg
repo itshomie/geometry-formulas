@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Geometry Formulas</title>
+  <desc id="desc">A visual reference card with geometry formulas and diagrams for circle, triangle, and prism measurements.</desc>
+  <rect width="1200" height="630" fill="#fffdfa"/>
+  <rect x="52" y="48" width="1096" height="534" rx="26" fill="#f6ead7" stroke="#ddd7cc" stroke-width="3"/>
+  <rect x="84" y="80" width="1032" height="470" rx="18" fill="#fffdfa"/>
+  <g transform="translate(116 118)">
+    <text x="0" y="0" fill="#17211d" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800">Geometry Formulas</text>
+    <text x="3" y="58" fill="#506158" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="600">Area, perimeter, volume &amp; surface area calculators</text>
+    <line x1="0" y1="91" x2="490" y2="91" stroke="#137c5a" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(128 270)" font-family="Arial, Helvetica, sans-serif">
+    <rect x="0" y="0" width="296" height="68" rx="12" fill="#e6f4ef" stroke="#137c5a" stroke-width="3"/>
+    <text x="28" y="44" fill="#17211d" font-size="34" font-weight="800">A = pi r^2</text>
+    <rect x="0" y="94" width="296" height="68" rx="12" fill="#fffdfa" stroke="#ddd7cc" stroke-width="3"/>
+    <text x="28" y="138" fill="#17211d" font-size="34" font-weight="800">V = pi r^2 h</text>
+    <rect x="0" y="188" width="296" height="68" rx="12" fill="#fffdfa" stroke="#ddd7cc" stroke-width="3"/>
+    <text x="28" y="232" fill="#17211d" font-size="34" font-weight="800">SA = 4 pi r^2</text>
+  </g>
+  <g transform="translate(505 218)">
+    <circle cx="120" cy="120" r="84" fill="#e6f4ef" stroke="#137c5a" stroke-width="8"/>
+    <circle cx="120" cy="120" r="6" fill="#17211d"/>
+    <line x1="120" y1="120" x2="204" y2="120" stroke="#b7791f" stroke-width="7" stroke-linecap="round"/>
+    <text x="150" y="105" fill="#17211d" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800">r</text>
+    <path d="M310 204 402 36 500 204 Z" fill="#e6f4ef" stroke="#137c5a" stroke-width="8" stroke-linejoin="round"/>
+    <line x1="402" y1="36" x2="402" y2="204" stroke="#b7791f" stroke-width="6" stroke-dasharray="12 10"/>
+    <text x="418" y="126" fill="#17211d" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800">h</text>
+    <path d="M92 348h180l58-48H150Z" fill="#f6ead7" stroke="#137c5a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M272 348V236l58-48v112" fill="#e6f4ef" stroke="#137c5a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M92 348V236h180v112Z" fill="#e6f4ef" stroke="#137c5a" stroke-width="7" stroke-linejoin="round"/>
+    <text x="138" y="389" fill="#17211d" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">V = lwh</text>
+  </g>
+</svg>

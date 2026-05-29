@@ -11,6 +11,14 @@ const brandAlternateName = "geometry formulas";
 const companyName = "Blue Core Technologies LLC";
 const contactEmailDisplay = "Ding [at] bluecoretechnologiesllc [dot] com";
 const googleAnalyticsId = "G-MTGR0VENZ1";
+const socialImage = {
+  path: "/assets/img/geometry-formulas-og.svg",
+  width: 1200,
+  height: 630,
+  type: "image/svg+xml",
+  alt: "Geometry Formulas visual reference with formulas and shape diagrams"
+};
+const socialImageUrl = `${siteUrl}${socialImage.path}`;
 
 const navItems = [
   ["Geometry Formulas", "/"],
@@ -728,7 +736,9 @@ function pageShell(page, body) {
       isAccessibleForFree: true,
       primaryImageOfPage: {
         "@type": "ImageObject",
-        url: `${siteUrl}/favicon.svg`,
+        url: socialImageUrl,
+        width: socialImage.width,
+        height: socialImage.height,
         caption: `${page.h1} visual formula reference`
       }
     },
@@ -737,7 +747,9 @@ function pageShell(page, body) {
     {
       "@context": "https://schema.org",
       "@type": "ImageObject",
-      url: `${siteUrl}/favicon.svg`,
+      url: socialImageUrl,
+      width: socialImage.width,
+      height: socialImage.height,
       caption: `${page.h1} diagram and formula card`
     },
     organizationSchema()
@@ -790,9 +802,16 @@ function pageShell(page, body) {
   <meta property="og:title" content="${escapeHtml(page.title)}">
   <meta property="og:description" content="${escapeHtml(page.description)}">
   <meta property="og:url" content="${absoluteUrl(page.slug)}">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="${socialImageUrl}">
+  <meta property="og:image:type" content="${socialImage.type}">
+  <meta property="og:image:width" content="${socialImage.width}">
+  <meta property="og:image:height" content="${socialImage.height}">
+  <meta property="og:image:alt" content="${escapeHtml(socialImage.alt)}">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(page.title)}">
   <meta name="twitter:description" content="${escapeHtml(page.description)}">
+  <meta name="twitter:image" content="${socialImageUrl}">
+  <meta name="twitter:image:alt" content="${escapeHtml(socialImage.alt)}">
   <link rel="canonical" href="${absoluteUrl(page.slug)}">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/vendor/katex/katex.min.css">
@@ -2863,6 +2882,8 @@ async function writePage(page) {
 async function writeGeometryRedirect() {
   const dir = path.join(root, "geometry-formulas");
   await mkdir(dir, { recursive: true });
+  const title = "Geometry Formulas";
+  const description = "Geometry Formulas is now served from the homepage with formula tables, visual calculators, step-by-step examples, and practice problems.";
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -2871,9 +2892,24 @@ async function writeGeometryRedirect() {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="0; url=/">
   <meta name="robots" content="noindex, follow">
-  <meta name="description" content="Geometry Formulas is now served from the homepage with formula tables, visual calculators, step-by-step examples, and practice problems.">
+  <meta name="description" content="${description}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="${brandName}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:url" content="${absoluteUrl("geometry-formulas")}">
+  <meta property="og:image" content="${socialImageUrl}">
+  <meta property="og:image:type" content="${socialImage.type}">
+  <meta property="og:image:width" content="${socialImage.width}">
+  <meta property="og:image:height" content="${socialImage.height}">
+  <meta property="og:image:alt" content="${escapeHtml(socialImage.alt)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${socialImageUrl}">
+  <meta name="twitter:image:alt" content="${escapeHtml(socialImage.alt)}">
   <link rel="canonical" href="${absoluteUrl("geometry-formulas")}">
-  <title>Geometry Formulas</title>
+  <title>${title}</title>
 </head>
 <body>
   <p><a href="/">Go to Geometry Formulas</a></p>
