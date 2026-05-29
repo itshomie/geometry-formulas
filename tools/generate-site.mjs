@@ -5,12 +5,20 @@ import katex from "katex";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteUrl = (process.env.SITE_URL || "https://geometry-formulas.com").replace(/\/$/, "");
-const lastmod = process.env.LASTMOD || "2026-05-16";
+const lastmod = process.env.LASTMOD || "2026-05-26";
 const brandName = "Geometry Formulas";
 const brandAlternateName = "geometry formulas";
 const companyName = "Blue Core Technologies LLC";
-const contactEmail = "Ding@bluecoretechnologiesllc.com";
+const contactEmailDisplay = "Ding [at] bluecoretechnologiesllc [dot] com";
 const googleAnalyticsId = "G-MTGR0VENZ1";
+const socialImage = {
+  path: "/assets/img/geometry-formulas-og.svg",
+  width: 1200,
+  height: 630,
+  type: "image/svg+xml",
+  alt: "Geometry Formulas visual reference with formulas and shape diagrams"
+};
+const socialImageUrl = `${siteUrl}${socialImage.path}`;
 
 const navItems = [
   ["Geometry Formulas", "/"],
@@ -42,9 +50,23 @@ const calculatorLinks = [
   ["Sphere Calculator", "/sphere-calculator/", "Calculate sphere volume and surface area."]
 ];
 
+const keywordLinks = [
+  ["Circle Area Formula", "/circle-area-formula/", "Find area of a circle from radius, diameter, or circumference."],
+  ["Circle Circumference Formula", "/circle-circumference-formula/", "Calculate circumference from radius or diameter."],
+  ["Triangle Area Formula", "/triangle-area-formula/", "Use base and height, or solve backwards from area."],
+  ["Rectangle Area Formula", "/rectangle-area-formula/", "Find rectangle area, length, or width."],
+  ["Square Area Formula", "/square-area-formula/", "Calculate area, side length, and diagonal relationships."],
+  ["Pythagorean Theorem Formula", "/pythagorean-theorem-formula/", "Find a right-triangle hypotenuse or missing leg."],
+  ["Cylinder Volume Formula", "/cylinder-volume-formula/", "Calculate cylinder volume or solve for radius and height."],
+  ["Cylinder Surface Area Formula", "/cylinder-surface-area-formula/", "Compare total and lateral surface area."],
+  ["Cone Volume Formula", "/cone-volume-formula/", "Use radius and height, or solve backwards."],
+  ["Sphere Volume Formula", "/sphere-volume-formula/", "Calculate sphere volume from radius or diameter."],
+  ["Sphere Surface Area Formula", "/sphere-surface-area-formula/", "Find surface area or radius from surface area."],
+  ["Rectangular Prism Volume Formula", "/rectangular-prism-volume-formula/", "Use length, width, and height for boxes."]
+];
+
 const companyLinks = [
   ["About", "/about/"],
-  ["Team & Services", "/team-services/"],
   ["Contact", "/contact/"]
 ];
 
@@ -179,10 +201,13 @@ const pages = [
   volumePage(),
   surfaceAreaPage(),
   ...shapePages(),
+  ...keywordPages(),
   ...calculatorPages(),
   solverPage(),
   ...trustPages()
 ];
+
+validatePrimaryKeywords(pages);
 
 await writeAssets();
 for (const page of pages) {
@@ -197,6 +222,18 @@ await writeText("sitemap.xml", sitemapXml());
 function formula(value) {
   const tex = htmlFormulaToTex(value);
   return `<span class="formula" data-tex="${escapeHtml(tex)}">${renderMath(tex)}</span>`;
+}
+
+function validatePrimaryKeywords(pageList) {
+  const seen = new Map();
+  for (const page of pageList) {
+    if (!page.primaryKeyword) continue;
+    const key = page.primaryKeyword.toLowerCase().trim();
+    if (seen.has(key)) {
+      throw new Error(`Duplicate primary keyword "${page.primaryKeyword}" on /${seen.get(key)}/ and /${page.slug}/`);
+    }
+    seen.set(key, page.slug);
+  }
 }
 
 function renderMath(tex, options = {}) {
@@ -678,12 +715,14 @@ function calculatorWidget(type, title, intro = "", anchorId = "calculator") {
 }
 
 function pageShell(page, body) {
+  const robots = page.noindex ? "noindex,follow" : "index,follow";
   const schema = [
     {
       "@context": "https://schema.org",
       "@type": page.schemaType || "WebPage",
       name: page.title,
       description: page.description,
+      keywords: page.primaryKeyword,
       url: absoluteUrl(page.slug),
       inLanguage: "en",
       dateModified: lastmod,
@@ -697,7 +736,9 @@ function pageShell(page, body) {
       isAccessibleForFree: true,
       primaryImageOfPage: {
         "@type": "ImageObject",
-        url: `${siteUrl}/favicon.svg`,
+        url: socialImageUrl,
+        width: socialImage.width,
+        height: socialImage.height,
         caption: `${page.h1} visual formula reference`
       }
     },
@@ -706,7 +747,9 @@ function pageShell(page, body) {
     {
       "@context": "https://schema.org",
       "@type": "ImageObject",
-      url: `${siteUrl}/favicon.svg`,
+      url: socialImageUrl,
+      width: socialImage.width,
+      height: socialImage.height,
       caption: `${page.h1} diagram and formula card`
     },
     organizationSchema()
@@ -729,6 +772,21 @@ function pageShell(page, body) {
     });
   }
 
+  if (page.faqs && page.faqs.length) {
+    schema.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: page.faqs.map((item) => ({
+        "@type": "Question",
+        name: stripTags(item.q),
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: stripTags(item.a)
+        }
+      }))
+    });
+  }
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -737,16 +795,23 @@ function pageShell(page, body) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(page.title)}</title>
   <meta name="description" content="${escapeHtml(page.description)}">
-  <meta name="robots" content="index,follow">
+  <meta name="robots" content="${robots}">
   <meta name="theme-color" content="#137c5a">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="${brandName}">
   <meta property="og:title" content="${escapeHtml(page.title)}">
   <meta property="og:description" content="${escapeHtml(page.description)}">
   <meta property="og:url" content="${absoluteUrl(page.slug)}">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="${socialImageUrl}">
+  <meta property="og:image:type" content="${socialImage.type}">
+  <meta property="og:image:width" content="${socialImage.width}">
+  <meta property="og:image:height" content="${socialImage.height}">
+  <meta property="og:image:alt" content="${escapeHtml(socialImage.alt)}">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(page.title)}">
   <meta name="twitter:description" content="${escapeHtml(page.description)}">
+  <meta name="twitter:image" content="${socialImageUrl}">
+  <meta name="twitter:image:alt" content="${escapeHtml(socialImage.alt)}">
   <link rel="canonical" href="${absoluteUrl(page.slug)}">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/vendor/katex/katex.min.css">
@@ -780,7 +845,7 @@ function pageShell(page, body) {
     <div class="container footer-grid">
       <div class="footer-about">
         <p><strong>Geometry Formulas & Calculators for Students</strong><br>Fast reference pages, diagrams, and calculators for common geometry homework.</p>
-        <p class="footer-company">Operated by ${companyName}. Contact: <a href="mailto:${contactEmail}">${contactEmail}</a></p>
+        <p class="footer-company">Operated by ${companyName}. <a href="/contact/">Contact us</a></p>
       </div>
       <nav class="footer-links" aria-label="Footer navigation">
         <div>
@@ -796,6 +861,10 @@ function pageShell(page, body) {
           <a href="/geometry-solver/">Solver</a>
           <a href="/circle-calculator/">Circle Calculator</a>
           <a href="/triangle-calculator/">Triangle Calculator</a>
+        </div>
+        <div>
+          <strong>Popular</strong>
+          ${keywordLinks.slice(0, 5).map(([label, href]) => `<a href="${href}">${label}</a>`).join("")}
         </div>
         <div>
           <strong>Company</strong>
@@ -829,8 +898,7 @@ function organizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: companyName,
-    url: `${siteUrl}/`,
-    email: contactEmail
+    url: `${siteUrl}/`
   };
 }
 
@@ -960,7 +1028,7 @@ function infoBody(page, sections) {
         <aside class="note-panel info-aside">
           <h2>Site Information</h2>
           <p><strong>Operator:</strong><br>${companyName}</p>
-          <p><strong>Email:</strong><br><a href="mailto:${contactEmail}">${contactEmail}</a></p>
+          <p><strong>Email:</strong><br>${contactEmailText()}</p>
           <p><strong>Website:</strong><br><a href="${siteUrl}/">${siteUrl.replace(/^https?:\/\//, "")}</a></p>
         </aside>
       </div>
@@ -968,10 +1036,13 @@ function infoBody(page, sections) {
   `;
 }
 
+function contactEmailText() {
+  return `<span class="contact-email">${contactEmailDisplay}</span>`;
+}
+
 function trustPages() {
   return [
     aboutPage(),
-    teamServicesPage(),
     contactPage(),
     privacyPolicyPage(),
     termsOfUsePage()
@@ -986,7 +1057,8 @@ function aboutPage() {
     description: "Learn about Geometry Formulas, a student-focused site operated by Blue Core Technologies LLC with visual formulas and calculators.",
     intro: "Geometry Formulas is a student-focused reference site for common 2D and 3D geometry formulas, visual diagrams, examples, and calculators.",
     kicker: "About",
-    schemaType: "AboutPage"
+    schemaType: "AboutPage",
+    priority: "0.4"
   };
 
   const body = infoBody(page, [
@@ -1000,39 +1072,7 @@ function aboutPage() {
     },
     {
       title: "Who operates this website",
-      body: `<p>Geometry Formulas is operated by ${companyName}. For questions, corrections, or business inquiries, contact us at <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
-    }
-  ]);
-
-  return { ...page, body };
-}
-
-function teamServicesPage() {
-  const page = {
-    slug: "team-services",
-    h1: "Team & Services",
-    title: "Team & Services | Geometry Formulas",
-    description: "Learn about the Geometry Formulas team, educational content services, calculator planning, and contact information.",
-    intro: "Our work focuses on clear educational content, visual math references, and lightweight web calculators for student learning.",
-    kicker: "Team & Services"
-  };
-
-  const body = infoBody(page, [
-    {
-      title: "Our team focus",
-      body: `<p>The Geometry Formulas team focuses on turning common geometry topics into useful study pages. We prioritize accuracy, clear diagrams, fast pages, and calculators that show the formula and the steps behind each answer.</p>`
-    },
-    {
-      title: "Educational content services",
-      body: `<p>${companyName} can support educational web content planning, formula reference pages, calculator concepts, content structure, and search-focused information architecture for learning websites.</p>`
-    },
-    {
-      title: "What we do not provide",
-      body: `<p>The website does not provide private tutoring, graded homework completion, legal advice, or financial advice. Geometry calculators are educational tools and should be checked against class instructions when precision or rounding rules matter.</p>`
-    },
-    {
-      title: "Service inquiries",
-      body: `<p>For service or partnership inquiries, email <a href="mailto:${contactEmail}">${contactEmail}</a> with a short description of your project, timeline, and website or organization.</p>`
+      body: `<p>Geometry Formulas is operated by ${companyName}. For questions, corrections, or feedback, use the <a href="/contact/">contact page</a>.</p>`
     }
   ]);
 
@@ -1044,16 +1084,18 @@ function contactPage() {
     slug: "contact",
     h1: "Contact Geometry Formulas",
     title: "Contact Geometry Formulas",
-    description: "Contact Geometry Formulas for corrections, feedback, advertising questions, service inquiries, or website support.",
-    intro: "Use this page to contact the team about corrections, calculator feedback, partnership questions, or website support.",
+    description: "Contact Geometry Formulas for corrections, calculator feedback, privacy questions, or general site questions.",
+    intro: "Use this page to contact the team about corrections, calculator feedback, privacy questions, or general site questions.",
     kicker: "Contact",
-    schemaType: "ContactPage"
+    schemaType: "ContactPage",
+    noindex: true,
+    sitemap: false
   };
 
   const body = infoBody(page, [
     {
       title: "Email",
-      body: `<p>The best way to reach us is by email: <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>The best way to reach us is by email: ${contactEmailText()}.</p>`
     },
     {
       title: "What to include",
@@ -1064,8 +1106,8 @@ function contactPage() {
       body: `<p>We review correction requests for formula accuracy, wording clarity, calculator behavior, and page usability. Educational content may be updated when a correction improves clarity or accuracy for students.</p>`
     },
     {
-      title: "Advertising and privacy questions",
-      body: `<p>For advertising, privacy, or data questions, include “Privacy” or “Advertising” in the email subject so the message can be routed appropriately.</p>`
+      title: "Privacy questions",
+      body: `<p>For privacy or data questions, include “Privacy” in the email subject.</p>`
     }
   ]);
 
@@ -1077,9 +1119,11 @@ function privacyPolicyPage() {
     slug: "privacy-policy",
     h1: "Privacy Policy",
     title: "Privacy Policy | Geometry Formulas",
-    description: "Read the Geometry Formulas privacy policy, including contact information, cookies, analytics, advertising, and data choices.",
+    description: "Read the Geometry Formulas privacy policy, including contact information, cookies, analytics, and data choices.",
     intro: `This Privacy Policy explains how ${companyName} handles information for Geometry Formulas.`,
-    kicker: "Policy"
+    kicker: "Policy",
+    noindex: true,
+    sitemap: false
   };
 
   const body = infoBody(page, [
@@ -1089,31 +1133,31 @@ function privacyPolicyPage() {
     },
     {
       title: "Who we are",
-      body: `<p>Geometry Formulas is operated by ${companyName}. You can contact us at <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>Geometry Formulas is operated by ${companyName}. You can contact us through the <a href="/contact/">contact page</a>.</p>`
     },
     {
       title: "Information we may collect",
       body: `<p>When you visit the website, standard technical information may be processed automatically, such as browser type, device information, pages viewed, approximate location derived from IP address, referring pages, and interaction data. If you email us, we receive the information you choose to send.</p>`
     },
     {
-      title: "Cookies, analytics, and advertising",
-      body: `<p>The website may use cookies or similar technologies for site functionality, analytics, performance measurement, and advertising. If Google ads are enabled, Google and its partners may use cookies or identifiers to serve ads, limit repeated ads, measure ad performance, and help show more relevant advertising where permitted.</p><p>You can control cookies through your browser settings. You can also learn about Google advertising controls through Google’s ad settings and privacy tools.</p>`
+      title: "Cookies and analytics",
+      body: `<p>The website may use cookies or similar technologies for site functionality, analytics, and performance measurement. You can control cookies through your browser settings.</p>`
     },
     {
       title: "How information is used",
-      body: `<ul class="info-list"><li>To operate and improve the website.</li><li>To understand which formulas, calculators, and pages are useful.</li><li>To respond to messages sent by email.</li><li>To protect the website from abuse, spam, or technical problems.</li><li>To support advertising, measurement, and compliance when ads are used.</li></ul>`
+      body: `<ul class="info-list"><li>To operate and improve the website.</li><li>To understand which formulas, calculators, and pages are useful.</li><li>To respond to messages sent by email.</li><li>To protect the website from abuse, spam, or technical problems.</li></ul>`
     },
     {
       title: "Third-party services",
-      body: `<p>We may use third-party services for hosting, analytics, security, or advertising. These services may process information according to their own policies. The website is designed as a public educational resource and does not require user accounts.</p>`
+      body: `<p>We may use third-party services for hosting, analytics, or security. These services may process information according to their own policies. The website is designed as a public educational resource and does not require user accounts.</p>`
     },
     {
       title: "Children’s privacy",
-      body: `<p>Geometry Formulas is an educational website, but it is not designed to collect personal information from children. If you believe a child has sent personal information to us, contact <a href="mailto:${contactEmail}">${contactEmail}</a> so we can review and delete it where appropriate.</p>`
+      body: `<p>Geometry Formulas is an educational website, but it is not designed to collect personal information from children. If you believe a child has sent personal information to us, contact us through the <a href="/contact/">contact page</a> so we can review and delete it where appropriate.</p>`
     },
     {
       title: "Contact",
-      body: `<p>For privacy questions or requests, email <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>For privacy questions or requests, use the <a href="/contact/">contact page</a>.</p>`
     }
   ]);
 
@@ -1127,7 +1171,9 @@ function termsOfUsePage() {
     title: "Terms of Use | Geometry Formulas",
     description: "Read the Geometry Formulas terms of use for educational content, calculators, acceptable use, and contact information.",
     intro: "These Terms of Use explain the basic rules for using Geometry Formulas and its educational calculators.",
-    kicker: "Policy"
+    kicker: "Policy",
+    noindex: true,
+    sitemap: false
   };
 
   const body = infoBody(page, [
@@ -1153,7 +1199,7 @@ function termsOfUsePage() {
     },
     {
       title: "Changes and contact",
-      body: `<p>We may update these terms as the website changes. Questions about these terms can be sent to <a href="mailto:${contactEmail}">${contactEmail}</a>.</p>`
+      body: `<p>We may update these terms as the website changes. Questions about these terms can be sent through the <a href="/contact/">contact page</a>.</p>`
     }
   ]);
 
@@ -1254,6 +1300,16 @@ function homePage() {
           <h2>Common shapes</h2>
         </div>
         ${linkTiles(shapeLinks)}
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-kicker">Popular Formula Searches</p>
+          <h2>Focused formula guides</h2>
+          <p>These pages answer the most common formula-specific questions with direct formulas, examples, calculators, and reverse calculations.</p>
+        </div>
+        ${linkTiles(keywordLinks)}
       </div>
     </section>
     <section class="section">
@@ -1424,6 +1480,11 @@ function aggregateBody(page, tableTitle, formulaTable, exampleHtml) {
             <p class="section-kicker">Calculators</p>
             <h2>Related calculators</h2>
             ${linkTiles(calculatorLinks)}
+          </section>
+          <section class="section-block">
+            <p class="section-kicker">Specific formulas</p>
+            <h2>Popular formula guides</h2>
+            ${linkTiles(keywordLinks.slice(0, 6))}
           </section>
           <section class="section-block">
             <p class="section-kicker">FAQ</p>
@@ -1778,6 +1839,660 @@ function shapeBody(page) {
       </div>
     </section>
   `;
+}
+
+function keywordHeroVisual(page) {
+  const card = page.cardKey && formulaCards[page.cardKey]
+    ? formulaCard(formulaCards[page.cardKey], { calculatorHref: "#calculator" })
+    : "";
+  const visual = page.diagram ? diagram(page.diagram) : heroArt();
+  return `<div class="hero-tool-stack">${card}${visual}</div>`;
+}
+
+function keywordBody(page) {
+  return `
+    ${renderHero(page, keywordHeroVisual(page))}
+    <section class="section" id="quick-table">
+      <div class="container prose-grid">
+        <article class="prose-main">
+          ${directAnswerBlock(page)}
+          <section class="section-block">
+            <p class="section-kicker">Formula table</p>
+            <h2>${page.tableTitle}</h2>
+            ${table(page.formulaRows, ["Task", "Formula", "When to use it"])}
+          </section>
+          <section class="section-block">
+            <p class="section-kicker">Method</p>
+            <h2>How to use the formula</h2>
+            <ol>${page.method.map((step) => `<li>${step}</li>`).join("")}</ol>
+          </section>
+          ${keywordStudyGuide(page)}
+          ${calculatorWidget(page.calculator, page.calculatorTitle, page.calculatorIntro)}
+          <section class="section-block">
+            <p class="section-kicker">Examples</p>
+            <h2>Step-by-step examples</h2>
+            ${examples(page.examples)}
+          </section>
+          <section class="section-block">
+            <p class="section-kicker">Common mistakes</p>
+            <h2>Common mistakes</h2>
+            ${mistakes(page.mistakes)}
+          </section>
+          <section class="section-block">
+            <p class="section-kicker">Practice</p>
+            <h2>Practice problems with answers</h2>
+            ${practiceProblems(page.practice)}
+          </section>
+          <section class="section-block">
+            <p class="section-kicker">Related formulas</p>
+            <h2>Related formula pages</h2>
+            ${linkTiles(page.related)}
+          </section>
+          <section class="section-block">
+            <p class="section-kicker">FAQ</p>
+            <h2>${page.h1} FAQ</h2>
+            ${faqs(page.faqs)}
+          </section>
+        </article>
+        <aside class="aside">
+          <h2>On this page</h2>
+          <a href="#direct-answer">Direct answer</a>
+          <a href="#quick-table">Formula table</a>
+          <a href="#calculator">Calculator</a>
+          <a href="/">Geometry formulas sheet</a>
+          <a href="/geometry-calculator/">All calculators</a>
+        </aside>
+      </div>
+    </section>
+  `;
+}
+
+function keywordUnitAdvice(page) {
+  if (/volume/i.test(page.h1)) {
+    return "Because this is a volume formula, the final answer should use cubic units. If the measurements are in centimeters, the volume is in cubic centimeters; if the measurements are in feet, the volume is in cubic feet. Convert mixed units before substituting values so the multiplication does not combine different scales.";
+  }
+  if (/surface area/i.test(page.h1)) {
+    return "Because this is a surface area formula, the final answer should use square units. Surface area measures the outside of a three-dimensional solid, so it is not written in cubic units. A quick unit check catches many mistakes before you compare the numerical answer.";
+  }
+  if (/area/i.test(page.h1)) {
+    return "Because this is an area formula, the final answer should use square units. Area measures flat space, so a measurement in inches produces square inches and a measurement in meters produces square meters. If the problem mixes units, convert first and then apply the formula.";
+  }
+  return "Because this formula finds a distance or side length, the final answer should use linear units. Do not attach square or cubic units unless the problem asks for area or volume. Keeping unit type separate from the number is a simple way to catch formula mix-ups.";
+}
+
+function keywordStudyGuide(page) {
+  const mainTask = stripTags(page.formulaRows[0][0]).toLowerCase();
+  const mainFormula = stripTags(page.formulaRows[0][1]);
+  const reverseTasks = page.formulaRows
+    .slice(1)
+    .map((row) => stripTags(row[0]).toLowerCase())
+    .join(", ");
+  const relatedLabels = page.related.map(([label]) => label).join(", ");
+
+  return `
+    <section class="section-block">
+      <p class="section-kicker">Concept</p>
+      <h2>Understanding ${page.h1.toLowerCase()}</h2>
+      <p>This guide focuses on one calculation: ${mainTask}. The main formula is ${mainFormula}. Use this page when the problem is asking for that specific measurement, and use the related links when the problem is really asking for a broader shape review or a different geometry formula.</p>
+      <p>Before substituting numbers, identify each known measurement and match it to the variable in the formula. Most wrong answers come from using the right formula with the wrong input, such as using diameter where radius is required, using slant height where vertical height is required, or treating a side length as an area.</p>
+      <p>${keywordUnitAdvice(page)}</p>
+      <p>The reverse formulas are included for problems that give the result first and ask for a missing measurement. On this page, those reverse tasks include ${reverseTasks}. Use a reverse formula only when the known values match the formula table; otherwise, go back to the main shape page and choose a different formula.</p>
+      <p>After calculating, estimate whether the answer is reasonable. If every input gets larger, area and volume should usually get larger too. If a reverse calculation gives a negative value or a value that is larger than the original measurement in an impossible way, recheck the substituted values, the unit conversion, and the order of operations.</p>
+      <p>For more context, compare this focused guide with ${relatedLabels}. Those pages are linked below so this page can stay centered on ${page.primaryKeyword} while still giving you a path to nearby formulas.</p>
+    </section>
+  `;
+}
+
+function keywordPages() {
+  const common = {
+    schemaType: ["WebPage", "LearningResource"],
+    kicker: "Formula Guide",
+    priority: "0.7",
+    hasCalculator: true
+  };
+
+  const pages = [
+    {
+      slug: "circle-area-formula",
+      h1: "Circle Area Formula",
+      title: "Circle Area Formula: Area of a Circle with Examples",
+      description: "Learn the circle area formula A = pi r squared, how to use radius or diameter, common mistakes, examples, practice, and a calculator.",
+      intro: "Use the circle area formula to find the flat space inside a circle from radius, diameter, circumference, or area.",
+      directAnswerTitle: "What is the circle area formula?",
+      directAnswer: `The circle area formula is ${formula("A = &pi;r<sup>2</sup>")}, where r is the radius. If diameter is given, first use ${formula("r = d / 2")}, then substitute the radius. Area is written in square units, such as cm<sup>2</sup> or ft<sup>2</sup>.`,
+      tableTitle: "Circle area formulas",
+      formulaRows: [
+        ["Area from radius", formula("A = &pi;r<sup>2</sup>"), "Use when radius is known."],
+        ["Area from diameter", formula("A = &pi;(d / 2)<sup>2</sup>"), "Use when diameter is known."],
+        ["Radius from area", formula("r = &radic;(A / &pi;)"), "Use to solve backwards from area."],
+        ["Area from circumference", formula("A = C<sup>2</sup> / 4&pi;"), "Use when circumference is known."]
+      ],
+      method: [
+        "Identify the radius. If the problem gives diameter, divide it by 2 first.",
+        `Square the radius, then multiply by &pi; using ${formula("A = &pi;r<sup>2</sup>")}.`,
+        "Keep the exact answer in terms of pi if the problem asks for exact form.",
+        "Write the final area with square units."
+      ],
+      calculator: "circle",
+      calculatorTitle: "Circle Area Calculator",
+      calculatorIntro: "Enter radius, diameter, circumference, or area to calculate circle measurements with steps.",
+      cardKey: "circle",
+      diagram: "circle",
+      examples: [
+        { title: "Area from radius", steps: ["Given r = 8 cm.", `Use ${formula("A = &pi;r<sup>2</sup>")}.`, `A = &pi; &times; 8<sup>2</sup> = 64&pi; &asymp; 201.06 cm<sup>2</sup>.`] },
+        { title: "Area from diameter", steps: ["Given d = 14 m.", `First use ${formula("r = d / 2")}, so r = 7 m.`, `A = &pi; &times; 7<sup>2</sup> = 49&pi; &asymp; 153.94 m<sup>2</sup>.`] },
+        { title: "Radius from area", steps: ["Given A = 81&pi; in<sup>2</sup>.", `Use ${formula("r = &radic;(A / &pi;)")}.`, "r = &radic;(81&pi; / &pi;) = 9 in."] }
+      ],
+      mistakes: ["Using diameter as radius without dividing by 2.", "Forgetting to square the radius.", "Writing the answer in linear units instead of square units."],
+      practice: [
+        { q: "A circle has radius 6 cm. Find its area.", a: `A = 36&pi; &asymp; 113.10 cm<sup>2</sup>.` },
+        { q: "A circle has diameter 20 ft. Find its area.", a: `r = 10 ft, so A = 100&pi; &asymp; 314.16 ft<sup>2</sup>.` },
+        { q: "A circle has area 25&pi; m<sup>2</sup>. Find its radius.", a: "r = &radic;25 = 5 m." }
+      ],
+      related: [["Circle Formulas", "/circle-formulas/", "Review all circle formulas."], ["Circle Circumference Formula", "/circle-circumference-formula/", "Find the distance around a circle."], ["Area Formulas", "/area-formulas/", "Compare area formulas for common shapes."]],
+      faqs: [
+        { q: "What is the area of a circle formula?", a: `The formula is ${formula("A = &pi;r<sup>2</sup>")}, where r is the radius.` },
+        { q: "Can I use diameter in the circle area formula?", a: `Yes, but convert diameter to radius first with ${formula("r = d / 2")}.` },
+        { q: "Why are circle area answers square units?", a: "Area measures flat space, so the answer uses square units." }
+      ]
+    },
+    {
+      slug: "circle-circumference-formula",
+      h1: "Circle Circumference Formula",
+      title: "Circle Circumference Formula from Radius or Diameter",
+      description: "Learn the circle circumference formula C = 2 pi r or C = pi d with examples, reverse formulas, practice, and a calculator.",
+      intro: "Use the circle circumference formula to find the distance around a circle from radius or diameter.",
+      directAnswerTitle: "What is the circle circumference formula?",
+      directAnswer: `The circle circumference formula is ${formula("C = 2&pi;r")} when radius is known and ${formula("C = &pi;d")} when diameter is known. Circumference is the perimeter of a circle, so it uses linear units.`,
+      tableTitle: "Circle circumference formulas",
+      formulaRows: [
+        ["Circumference from radius", formula("C = 2&pi;r"), "Use when radius is known."],
+        ["Circumference from diameter", formula("C = &pi;d"), "Use when diameter is known."],
+        ["Radius from circumference", formula("r = C / 2&pi;"), "Use to solve backwards."],
+        ["Diameter from circumference", formula("d = C / &pi;"), "Use when the distance around the circle is known."]
+      ],
+      method: [
+        "Choose the formula based on the measurement given.",
+        `Use ${formula("C = 2&pi;r")} if radius is known, or ${formula("C = &pi;d")} if diameter is known.`,
+        "Keep pi in the answer for exact form, or multiply by 3.14159 for a decimal.",
+        "Write circumference with linear units, not square units."
+      ],
+      calculator: "circle",
+      calculatorTitle: "Circle Circumference Calculator",
+      calculatorIntro: "Enter radius, diameter, circumference, or area to calculate circle values with steps.",
+      cardKey: "circle",
+      diagram: "circle",
+      examples: [
+        { title: "Circumference from radius", steps: ["Given r = 4 cm.", `Use ${formula("C = 2&pi;r")}.`, "C = 8&pi; &asymp; 25.13 cm."] },
+        { title: "Circumference from diameter", steps: ["Given d = 15 ft.", `Use ${formula("C = &pi;d")}.`, "C = 15&pi; &asymp; 47.12 ft."] },
+        { title: "Radius from circumference", steps: ["Given C = 18&pi; m.", `Use ${formula("r = C / 2&pi;")}.`, "r = 18&pi; / 2&pi; = 9 m."] }
+      ],
+      mistakes: ["Confusing circumference with area.", "Using radius in C = pi d without doubling it first.", "Putting square units on circumference."],
+      practice: [
+        { q: "Find circumference when r = 9 in.", a: "C = 18&pi; &asymp; 56.55 in." },
+        { q: "Find circumference when d = 22 cm.", a: "C = 22&pi; &asymp; 69.12 cm." },
+        { q: "Find diameter when C = 12&pi; ft.", a: "d = 12 ft." }
+      ],
+      related: [["Circle Formulas", "/circle-formulas/", "Review area, radius, and diameter formulas."], ["Circle Area Formula", "/circle-area-formula/", "Find the space inside a circle."], ["Perimeter Formulas", "/perimeter-formulas/", "Compare perimeter and circumference."]],
+      faqs: [
+        { q: "Is circumference the same as perimeter?", a: "Yes. Circumference is the perimeter of a circle." },
+        { q: "Which circumference formula should I use?", a: `Use ${formula("C = 2&pi;r")} with radius and ${formula("C = &pi;d")} with diameter.` },
+        { q: "What units does circumference use?", a: "Circumference uses linear units such as cm, m, in, or ft." }
+      ]
+    },
+    {
+      slug: "triangle-area-formula",
+      h1: "Triangle Area Formula",
+      title: "Triangle Area Formula: Base, Height, and Examples",
+      description: "Learn the triangle area formula A = 1/2 bh, how to find base or height backwards, examples, mistakes, practice, and a calculator.",
+      intro: "Use the triangle area formula when you know a base and the perpendicular height.",
+      directAnswerTitle: "What is the triangle area formula?",
+      directAnswer: `The triangle area formula is ${formula("A = 1/2bh")}, where b is the base and h is the perpendicular height. The height must meet the base at a right angle; a slanted side is not the height unless it is perpendicular to the chosen base.`,
+      tableTitle: "Triangle area formulas",
+      formulaRows: [
+        ["Area from base and height", formula("A = 1/2bh"), "Use when base and perpendicular height are known."],
+        ["Height from area and base", formula("h = 2A / b"), "Use to solve backwards for height."],
+        ["Base from area and height", formula("b = 2A / h"), "Use to solve backwards for base."],
+        ["Heron's formula", formula("A = &radic;(s(s-a)(s-b)(s-c))"), "Use when all three side lengths are known."]
+      ],
+      method: [
+        "Choose a base side.",
+        "Use the perpendicular height to that base.",
+        `Multiply base by height, then divide by 2 using ${formula("A = 1/2bh")}.`,
+        "Write the answer with square units."
+      ],
+      calculator: "triangle",
+      calculatorTitle: "Triangle Area Calculator",
+      calculatorIntro: "Enter base and height, area and base, or side lengths to calculate triangle values with steps.",
+      cardKey: "triangle",
+      diagram: "triangle",
+      examples: [
+        { title: "Area from base and height", steps: ["Given b = 12 cm and h = 7 cm.", `Use ${formula("A = 1/2bh")}.`, `A = 1/2 &times; 12 &times; 7 = 42 cm<sup>2</sup>.`] },
+        { title: "Height from area", steps: ["Given A = 60 ft<sup>2</sup> and b = 15 ft.", `Use ${formula("h = 2A / b")}.`, "h = 120 / 15 = 8 ft."] },
+        { title: "Base from area", steps: ["Given A = 45 m<sup>2</sup> and h = 9 m.", `Use ${formula("b = 2A / h")}.`, "b = 90 / 9 = 10 m."] }
+      ],
+      mistakes: ["Using a side length as height when it is not perpendicular.", "Forgetting to divide by 2.", "Using linear units for area."],
+      practice: [
+        { q: "Find area when b = 16 cm and h = 5 cm.", a: `A = 40 cm<sup>2</sup>.` },
+        { q: "Find height when A = 72 ft<sup>2</sup> and b = 12 ft.", a: "h = 12 ft." },
+        { q: "Find base when A = 30 m<sup>2</sup> and h = 6 m.", a: "b = 10 m." }
+      ],
+      related: [["Triangle Formulas", "/triangle-formulas/", "Review perimeter and right-triangle formulas."], ["Area Formulas", "/area-formulas/", "Compare area formulas."], ["Pythagorean Theorem Formula", "/pythagorean-theorem-formula/", "Solve right-triangle side lengths."]],
+      faqs: [
+        { q: "What is the formula for the area of a triangle?", a: `The formula is ${formula("A = 1/2bh")}.` },
+        { q: "Does the triangle height have to be perpendicular?", a: "Yes. Height is the perpendicular distance from the base to the opposite vertex." },
+        { q: "Can I find height from area?", a: `Yes. Rearrange the formula to ${formula("h = 2A / b")}.` }
+      ]
+    },
+    {
+      slug: "rectangle-area-formula",
+      h1: "Rectangle Area Formula",
+      title: "Rectangle Area Formula: Length Times Width",
+      description: "Learn the rectangle area formula A = lw, reverse formulas for length and width, examples, practice, and a calculator.",
+      intro: "Use the rectangle area formula to find the flat space inside a rectangle from length and width.",
+      directAnswerTitle: "What is the rectangle area formula?",
+      directAnswer: `The rectangle area formula is ${formula("A = lw")}, where l is length and w is width. Length and width must be in the same unit before multiplying, and the answer uses square units.`,
+      tableTitle: "Rectangle area formulas",
+      formulaRows: [
+        ["Area from length and width", formula("A = lw"), "Use when both dimensions are known."],
+        ["Length from area and width", formula("l = A / w"), "Use to solve backwards for length."],
+        ["Width from area and length", formula("w = A / l"), "Use to solve backwards for width."],
+        ["Area from diagonal and one side", formula("A = l&radic;(d<sup>2</sup> - l<sup>2</sup>)"), "Use when diagonal and length are known."]
+      ],
+      method: [
+        "Check that length and width use the same unit.",
+        `Multiply length by width using ${formula("A = lw")}.`,
+        "If area is known, divide area by the known side to find the missing side.",
+        "Write the area with square units."
+      ],
+      calculator: "rectangle",
+      calculatorTitle: "Rectangle Area Calculator",
+      calculatorIntro: "Enter length and width to calculate rectangle area, perimeter, and diagonal.",
+      cardKey: "rectangle",
+      diagram: "rectangle",
+      examples: [
+        { title: "Area from dimensions", steps: ["Given l = 14 cm and w = 5 cm.", `Use ${formula("A = lw")}.`, `A = 14 &times; 5 = 70 cm<sup>2</sup>.`] },
+        { title: "Width from area", steps: ["Given A = 96 ft<sup>2</sup> and l = 12 ft.", `Use ${formula("w = A / l")}.`, "w = 96 / 12 = 8 ft."] },
+        { title: "Length from area", steps: ["Given A = 63 m<sup>2</sup> and w = 7 m.", `Use ${formula("l = A / w")}.`, "l = 63 / 7 = 9 m."] }
+      ],
+      mistakes: ["Adding length and width instead of multiplying.", "Mixing units before multiplying.", "Writing area in linear units."],
+      practice: [
+        { q: "Find area when l = 18 in and w = 4 in.", a: `A = 72 in<sup>2</sup>.` },
+        { q: "Find width when A = 120 ft<sup>2</sup> and l = 15 ft.", a: "w = 8 ft." },
+        { q: "Find length when A = 54 cm<sup>2</sup> and w = 6 cm.", a: "l = 9 cm." }
+      ],
+      related: [["Rectangle Formulas", "/rectangle-formulas/", "Review perimeter and diagonal."], ["Square Area Formula", "/square-area-formula/", "Compare square area."], ["Area Formulas", "/area-formulas/", "See area formulas for many shapes."]],
+      faqs: [
+        { q: "What is the area formula for a rectangle?", a: `The formula is ${formula("A = lw")}.` },
+        { q: "How do I find width from area?", a: `Use ${formula("w = A / l")}.` },
+        { q: "Does rectangle area need square units?", a: "Yes. Rectangle area is measured in square units." }
+      ]
+    },
+    {
+      slug: "square-area-formula",
+      h1: "Square Area Formula",
+      title: "Square Area Formula: Side Squared with Examples",
+      description: "Learn the square area formula A = s squared, how to find side length from area, examples, practice, and a calculator.",
+      intro: "Use the square area formula when all four sides are equal and one side length is known.",
+      directAnswerTitle: "What is the square area formula?",
+      directAnswer: `The square area formula is ${formula("A = s<sup>2</sup>")}, where s is the side length. Because every side of a square is equal, one side length is enough to find area.`,
+      tableTitle: "Square area formulas",
+      formulaRows: [
+        ["Area from side length", formula("A = s<sup>2</sup>"), "Use when side length is known."],
+        ["Side length from area", formula("s = &radic;A"), "Use to solve backwards from area."],
+        ["Area from diagonal", formula("A = d<sup>2</sup> / 2"), "Use when diagonal is known."],
+        ["Diagonal from side", formula("d = s&radic;2"), "Use to connect area and diagonal."]
+      ],
+      method: [
+        "Find the side length.",
+        `Multiply the side by itself using ${formula("A = s<sup>2</sup>")}.`,
+        "If area is known, take the square root to find side length.",
+        "Use square units for area."
+      ],
+      calculator: "square",
+      calculatorTitle: "Square Area Calculator",
+      calculatorIntro: "Enter a side length to calculate square area, perimeter, and diagonal.",
+      cardKey: "square",
+      diagram: "square",
+      examples: [
+        { title: "Area from side length", steps: ["Given s = 11 cm.", `Use ${formula("A = s<sup>2</sup>")}.`, `A = 11<sup>2</sup> = 121 cm<sup>2</sup>.`] },
+        { title: "Side from area", steps: ["Given A = 144 ft<sup>2</sup>.", `Use ${formula("s = &radic;A")}.`, "s = &radic;144 = 12 ft."] },
+        { title: "Area from diagonal", steps: ["Given d = 10 m.", `Use ${formula("A = d<sup>2</sup> / 2")}.`, `A = 100 / 2 = 50 m<sup>2</sup>.`] }
+      ],
+      mistakes: ["Multiplying the side by 4 instead of squaring it.", "Using perimeter units for area.", "Assuming a rectangle is a square when the side lengths are different."],
+      practice: [
+        { q: "Find area when s = 13 in.", a: `A = 169 in<sup>2</sup>.` },
+        { q: "Find side length when A = 225 cm<sup>2</sup>.", a: "s = 15 cm." },
+        { q: "Find area when d = 8 ft.", a: `A = 32 ft<sup>2</sup>.` }
+      ],
+      related: [["Square Formulas", "/square-formulas/", "Review perimeter and diagonal."], ["Rectangle Area Formula", "/rectangle-area-formula/", "Compare rectangle area."], ["Area Formulas", "/area-formulas/", "See common area formulas."]],
+      faqs: [
+        { q: "What is the formula for the area of a square?", a: `The formula is ${formula("A = s<sup>2</sup>")}.` },
+        { q: "How do I find side length from square area?", a: `Use ${formula("s = &radic;A")}.` },
+        { q: "Why is square area side squared?", a: "A square has equal length and width, so area is side times side." }
+      ]
+    },
+    {
+      slug: "pythagorean-theorem-formula",
+      h1: "Pythagorean Theorem Formula",
+      title: "Pythagorean Theorem Formula for Right Triangles",
+      description: "Learn the Pythagorean theorem formula a squared plus b squared equals c squared with examples, missing-side formulas, practice, and a calculator.",
+      intro: "Use the Pythagorean theorem formula to find missing side lengths in right triangles.",
+      directAnswerTitle: "What is the Pythagorean theorem formula?",
+      directAnswer: `The Pythagorean theorem formula is ${formula("a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup>")}. It works only for right triangles, where c is the hypotenuse opposite the right angle and a and b are the legs.`,
+      tableTitle: "Right-triangle formulas",
+      formulaRows: [
+        ["Pythagorean theorem", formula("a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup>"), "Use for right triangles."],
+        ["Find hypotenuse", formula("c = &radic;(a<sup>2</sup> + b<sup>2</sup>)"), "Use when both legs are known."],
+        ["Find missing leg a", formula("a = &radic;(c<sup>2</sup> - b<sup>2</sup>)"), "Use when hypotenuse and leg b are known."],
+        ["Find missing leg b", formula("b = &radic;(c<sup>2</sup> - a<sup>2</sup>)"), "Use when hypotenuse and leg a are known."]
+      ],
+      method: [
+        "Confirm the triangle has a right angle.",
+        "Identify the hypotenuse as the side opposite the right angle.",
+        `Substitute the known side lengths into ${formula("a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup>")}.`,
+        "Take the square root at the end to find the missing side length."
+      ],
+      calculator: "triangle",
+      calculatorTitle: "Right Triangle Calculator",
+      calculatorIntro: "Enter two right-triangle legs to calculate the hypotenuse, or use triangle fields for area and perimeter checks.",
+      cardKey: "triangle",
+      diagram: "triangle",
+      examples: [
+        { title: "Find hypotenuse", steps: ["Given legs a = 6 and b = 8.", `Use ${formula("c = &radic;(a<sup>2</sup> + b<sup>2</sup>)")}.`, "c = &radic;(36 + 64) = 10."] },
+        { title: "Find missing leg", steps: ["Given c = 13 and b = 5.", `Use ${formula("a = &radic;(c<sup>2</sup> - b<sup>2</sup>)")}.`, "a = &radic;(169 - 25) = 12."] },
+        { title: "Check a right triangle", steps: ["Given sides 9, 12, and 15.", `Check ${formula("9<sup>2</sup> + 12<sup>2</sup> = 15<sup>2</sup>")}.`, "81 + 144 = 225, so the triangle is right."] }
+      ],
+      mistakes: ["Using the theorem on a triangle that is not right.", "Choosing the wrong side as the hypotenuse.", "Forgetting to take the square root after adding squares."],
+      practice: [
+        { q: "Find c when a = 5 and b = 12.", a: "c = 13." },
+        { q: "Find a when c = 17 and b = 8.", a: "a = 15." },
+        { q: "Are sides 7, 24, and 25 a right triangle?", a: "Yes, because 49 + 576 = 625." }
+      ],
+      related: [["Triangle Formulas", "/triangle-formulas/", "Review all triangle formulas."], ["Triangle Area Formula", "/triangle-area-formula/", "Find triangle area from base and height."], ["Rectangle Formulas", "/rectangle-formulas/", "Use diagonals as right triangles."]],
+      faqs: [
+        { q: "When can I use the Pythagorean theorem?", a: "Use it only for right triangles." },
+        { q: "Which side is c?", a: "c is the hypotenuse, the side opposite the right angle." },
+        { q: "How do I find a missing leg?", a: `Subtract the known leg squared from the hypotenuse squared, then take the square root: ${formula("a = &radic;(c<sup>2</sup> - b<sup>2</sup>)")}.` }
+      ]
+    },
+    {
+      slug: "cylinder-volume-formula",
+      h1: "Cylinder Volume Formula",
+      title: "Cylinder Volume Formula with Examples and Calculator",
+      description: "Learn the cylinder volume formula V = pi r squared h, reverse formulas for height and radius, examples, practice, and a calculator.",
+      intro: "Use the cylinder volume formula to find the space inside a cylinder from radius and height.",
+      directAnswerTitle: "What is the cylinder volume formula?",
+      directAnswer: `The cylinder volume formula is ${formula("V = &pi;r<sup>2</sup>h")}, where r is radius and h is height. It is base area ${formula("B = &pi;r<sup>2</sup>")} multiplied by height.`,
+      tableTitle: "Cylinder volume formulas",
+      formulaRows: [
+        ["Volume from radius and height", formula("V = &pi;r<sup>2</sup>h"), "Use when radius and height are known."],
+        ["Height from volume and radius", formula("h = V / (&pi;r<sup>2</sup>)"), "Use to solve backwards for height."],
+        ["Radius from volume and height", formula("r = &radic;(V / &pi;h)"), "Use to solve backwards for radius."],
+        ["Base area", formula("B = &pi;r<sup>2</sup>"), "Find circular base area first."]
+      ],
+      method: [
+        "Use radius, not diameter. If diameter is given, divide by 2 first.",
+        `Find the circular base area with ${formula("B = &pi;r<sup>2</sup>")}.`,
+        `Multiply base area by height using ${formula("V = &pi;r<sup>2</sup>h")}.`,
+        "Write the final volume with cubic units."
+      ],
+      calculator: "cylinder",
+      calculatorTitle: "Cylinder Volume Calculator",
+      calculatorIntro: "Enter radius and height, or use volume plus one dimension to solve backwards.",
+      cardKey: "cylinder",
+      diagram: "cylinder",
+      examples: [
+        { title: "Volume from radius and height", steps: ["Given r = 4 cm and h = 12 cm.", `Use ${formula("V = &pi;r<sup>2</sup>h")}.`, `V = &pi; &times; 4<sup>2</sup> &times; 12 = 192&pi; &asymp; 603.19 cm<sup>3</sup>.`] },
+        { title: "Height from volume", steps: ["Given V = 200&pi; in<sup>3</sup> and r = 5 in.", `Use ${formula("h = V / (&pi;r<sup>2</sup>)")}.`, "h = 200&pi; / 25&pi; = 8 in."] },
+        { title: "Radius from volume", steps: ["Given V = 75&pi; ft<sup>3</sup> and h = 3 ft.", `Use ${formula("r = &radic;(V / &pi;h)")}.`, "r = &radic;(75&pi; / 3&pi;) = 5 ft."] }
+      ],
+      mistakes: ["Using diameter instead of radius.", "Forgetting to square the radius.", "Writing volume in square units instead of cubic units."],
+      practice: [
+        { q: "Find volume when r = 3 m and h = 7 m.", a: `V = 63&pi; &asymp; 197.92 m<sup>3</sup>.` },
+        { q: "Find height when V = 48&pi; cm<sup>3</sup> and r = 4 cm.", a: "h = 3 cm." },
+        { q: "Find radius when V = 98&pi; in<sup>3</sup> and h = 2 in.", a: "r = 7 in." }
+      ],
+      related: [["Cylinder Formulas", "/cylinder-formulas/", "Review all cylinder formulas."], ["Cylinder Surface Area Formula", "/cylinder-surface-area-formula/", "Find outside area of a cylinder."], ["Volume Formulas", "/volume-formulas/", "Compare 3D volume formulas."]],
+      faqs: [
+        { q: "What is the formula for volume of a cylinder?", a: `The formula is ${formula("V = &pi;r<sup>2</sup>h")}.` },
+        { q: "Why does cylinder volume use r squared?", a: "The base is a circle, so its area is pi times radius squared." },
+        { q: "What units does cylinder volume use?", a: "Cylinder volume uses cubic units." }
+      ]
+    },
+    {
+      slug: "cylinder-surface-area-formula",
+      h1: "Cylinder Surface Area Formula",
+      title: "Cylinder Surface Area Formula: Total and Lateral Area",
+      description: "Learn total and lateral surface area formulas for cylinders with examples, mistakes, practice problems, and a calculator.",
+      intro: "Use cylinder surface area formulas to find the outside area of the curved side and circular bases.",
+      directAnswerTitle: "What is the cylinder surface area formula?",
+      directAnswer: `The total cylinder surface area formula is ${formula("TSA = 2&pi;r(r + h)")}. Lateral surface area is only the curved side, ${formula("LSA = 2&pi;rh")}. Total surface area includes the curved side plus both circular bases.`,
+      tableTitle: "Cylinder surface area formulas",
+      formulaRows: [
+        ["Total surface area", formula("TSA = 2&pi;r(r + h)"), "Use when both bases are included."],
+        ["Lateral surface area", formula("LSA = 2&pi;rh"), "Use for the curved side only."],
+        ["One base area", formula("B = &pi;r<sup>2</sup>"), "Use for each circular base."],
+        ["Expanded total area", formula("TSA = 2&pi;rh + 2&pi;r<sup>2</sup>"), "Shows side area plus two bases."]
+      ],
+      method: [
+        "Decide whether the problem asks for total surface area or lateral surface area.",
+        `Use ${formula("LSA = 2&pi;rh")} for the curved side only.`,
+        `Add two circular bases with ${formula("2&pi;r<sup>2</sup>")} for total surface area.`,
+        "Write the answer with square units."
+      ],
+      calculator: "cylinder",
+      calculatorTitle: "Cylinder Surface Area Calculator",
+      calculatorIntro: "Enter radius and height to calculate total surface area, lateral surface area, volume, and base area.",
+      cardKey: "cylinder",
+      diagram: "cylinder",
+      examples: [
+        { title: "Total surface area", steps: ["Given r = 3 cm and h = 8 cm.", `Use ${formula("TSA = 2&pi;r(r + h)")}.`, `TSA = 2&pi; &times; 3(3 + 8) = 66&pi; &asymp; 207.35 cm<sup>2</sup>.`] },
+        { title: "Lateral surface area", steps: ["Given r = 3 cm and h = 8 cm.", `Use ${formula("LSA = 2&pi;rh")}.`, `LSA = 48&pi; &asymp; 150.80 cm<sup>2</sup>.`] },
+        { title: "Area of two bases", steps: ["Given r = 3 cm.", `Use ${formula("2B = 2&pi;r<sup>2</sup>")}.`, `2B = 18&pi; &asymp; 56.55 cm<sup>2</sup>.`] }
+      ],
+      mistakes: ["Using lateral surface area when the problem asks for total surface area.", "Forgetting the two circular bases.", "Using cubic units for surface area."],
+      practice: [
+        { q: "Find TSA when r = 5 in and h = 9 in.", a: `TSA = 140&pi; &asymp; 439.82 in<sup>2</sup>.` },
+        { q: "Find LSA when r = 4 m and h = 6 m.", a: `LSA = 48&pi; &asymp; 150.80 m<sup>2</sup>.` },
+        { q: "Find the area of two bases when r = 7 cm.", a: `2B = 98&pi; &asymp; 307.88 cm<sup>2</sup>.` }
+      ],
+      related: [["Cylinder Formulas", "/cylinder-formulas/", "Review all cylinder formulas."], ["Cylinder Volume Formula", "/cylinder-volume-formula/", "Find volume of a cylinder."], ["Surface Area Formulas", "/surface-area-formulas/", "Compare surface area formulas."]],
+      faqs: [
+        { q: "What is total surface area of a cylinder?", a: `Total surface area is ${formula("TSA = 2&pi;r(r + h)")}.` },
+        { q: "What is lateral surface area of a cylinder?", a: `Lateral surface area is ${formula("LSA = 2&pi;rh")}.` },
+        { q: "Does cylinder surface area use square units?", a: "Yes. Surface area uses square units." }
+      ]
+    },
+    {
+      slug: "cone-volume-formula",
+      h1: "Cone Volume Formula",
+      title: "Cone Volume Formula with Examples and Calculator",
+      description: "Learn the cone volume formula V = 1/3 pi r squared h, reverse formulas, examples, practice, and a calculator.",
+      intro: "Use the cone volume formula to find the space inside a cone from radius and height.",
+      directAnswerTitle: "What is the cone volume formula?",
+      directAnswer: `The cone volume formula is ${formula("V = 1/3&pi;r<sup>2</sup>h")}, where r is radius and h is vertical height. A cone has one third the volume of a cylinder with the same base and height.`,
+      tableTitle: "Cone volume formulas",
+      formulaRows: [
+        ["Volume from radius and height", formula("V = 1/3&pi;r<sup>2</sup>h"), "Use when radius and vertical height are known."],
+        ["Height from volume and radius", formula("h = 3V / (&pi;r<sup>2</sup>)"), "Use to solve backwards for height."],
+        ["Radius from volume and height", formula("r = &radic;(3V / &pi;h)"), "Use to solve backwards for radius."],
+        ["Base area", formula("B = &pi;r<sup>2</sup>"), "Use before multiplying by one third of height."]
+      ],
+      method: [
+        "Use vertical height, not slant height.",
+        `Find the circular base area with ${formula("B = &pi;r<sup>2</sup>")}.`,
+        `Multiply by height and divide by 3 using ${formula("V = 1/3&pi;r<sup>2</sup>h")}.`,
+        "Write the volume with cubic units."
+      ],
+      calculator: "cone",
+      calculatorTitle: "Cone Volume Calculator",
+      calculatorIntro: "Enter radius and height, or solve backwards from volume with one known dimension.",
+      cardKey: "cone",
+      diagram: "cone",
+      examples: [
+        { title: "Volume from radius and height", steps: ["Given r = 5 cm and h = 12 cm.", `Use ${formula("V = 1/3&pi;r<sup>2</sup>h")}.`, `V = 100&pi; &asymp; 314.16 cm<sup>3</sup>.`] },
+        { title: "Height from volume", steps: ["Given V = 48&pi; ft<sup>3</sup> and r = 4 ft.", `Use ${formula("h = 3V / (&pi;r<sup>2</sup>)")}.`, "h = 144&pi; / 16&pi; = 9 ft."] },
+        { title: "Radius from volume", steps: ["Given V = 12&pi; m<sup>3</sup> and h = 9 m.", `Use ${formula("r = &radic;(3V / &pi;h)")}.`, "r = &radic;(36&pi; / 9&pi;) = 2 m."] }
+      ],
+      mistakes: ["Using slant height instead of vertical height.", "Forgetting the one third.", "Using diameter as radius."],
+      practice: [
+        { q: "Find volume when r = 3 in and h = 10 in.", a: `V = 30&pi; &asymp; 94.25 in<sup>3</sup>.` },
+        { q: "Find height when V = 75&pi; cm<sup>3</sup> and r = 5 cm.", a: "h = 9 cm." },
+        { q: "Find radius when V = 36&pi; ft<sup>3</sup> and h = 12 ft.", a: "r = 3 ft." }
+      ],
+      related: [["Cone Formulas", "/cone-formulas/", "Review cone surface area and slant height."], ["Cylinder Volume Formula", "/cylinder-volume-formula/", "Compare cone and cylinder volume."], ["Volume Formulas", "/volume-formulas/", "See all volume formulas."]],
+      faqs: [
+        { q: "What is the volume formula for a cone?", a: `The formula is ${formula("V = 1/3&pi;r<sup>2</sup>h")}.` },
+        { q: "Why is cone volume one third of cylinder volume?", a: "A cone with the same base and height as a cylinder has one third of the cylinder's volume." },
+        { q: "Does cone volume use slant height?", a: "No. Cone volume uses vertical height." }
+      ]
+    },
+    {
+      slug: "sphere-volume-formula",
+      h1: "Sphere Volume Formula",
+      title: "Sphere Volume Formula with Examples and Calculator",
+      description: "Learn the sphere volume formula V = 4/3 pi r cubed, reverse radius formulas, examples, practice, and a calculator.",
+      intro: "Use the sphere volume formula to find the space inside a sphere from radius or diameter.",
+      directAnswerTitle: "What is the sphere volume formula?",
+      directAnswer: `The sphere volume formula is ${formula("V = 4/3&pi;r<sup>3</sup>")}, where r is radius. If diameter is given, use ${formula("r = d / 2")} before cubing the radius.`,
+      tableTitle: "Sphere volume formulas",
+      formulaRows: [
+        ["Volume from radius", formula("V = 4/3&pi;r<sup>3</sup>"), "Use when radius is known."],
+        ["Volume from diameter", formula("V = 4/3&pi;(d / 2)<sup>3</sup>"), "Use when diameter is known."],
+        ["Radius from volume", formula("r = &#8731;(3V / 4&pi;)"), "Use to solve backwards from volume."],
+        ["Diameter from radius", formula("d = 2r"), "Use after finding radius."]
+      ],
+      method: [
+        "Convert diameter to radius if needed.",
+        `Cube the radius, then multiply by ${formula("4/3&pi;")}.`,
+        "Keep exact answers in terms of pi if requested.",
+        "Write sphere volume with cubic units."
+      ],
+      calculator: "sphere",
+      calculatorTitle: "Sphere Volume Calculator",
+      calculatorIntro: "Enter radius, diameter, volume, or surface area to calculate sphere measurements with steps.",
+      cardKey: "sphere",
+      diagram: "sphere",
+      examples: [
+        { title: "Volume from radius", steps: ["Given r = 3 cm.", `Use ${formula("V = 4/3&pi;r<sup>3</sup>")}.`, `V = 36&pi; &asymp; 113.10 cm<sup>3</sup>.`] },
+        { title: "Volume from diameter", steps: ["Given d = 10 in.", `First use ${formula("r = d / 2")}, so r = 5 in.`, `V = 500/3&pi; &asymp; 523.60 in<sup>3</sup>.`] },
+        { title: "Radius from volume", steps: ["Given V = 288&pi; ft<sup>3</sup>.", `Use ${formula("r = &#8731;(3V / 4&pi;)")}.`, "r = &#8731;(216) = 6 ft."] }
+      ],
+      mistakes: ["Using diameter as radius.", "Squaring radius instead of cubing it.", "Writing volume in square units."],
+      practice: [
+        { q: "Find volume when r = 4 m.", a: `V = 256/3&pi; &asymp; 268.08 m<sup>3</sup>.` },
+        { q: "Find volume when d = 12 cm.", a: `r = 6 cm, so V = 288&pi; &asymp; 904.78 cm<sup>3</sup>.` },
+        { q: "Find radius when V = 36&pi; in<sup>3</sup>.", a: "r = 3 in." }
+      ],
+      related: [["Sphere Formulas", "/sphere-formulas/", "Review all sphere formulas."], ["Sphere Surface Area Formula", "/sphere-surface-area-formula/", "Find outside area of a sphere."], ["Volume Formulas", "/volume-formulas/", "Compare volume formulas."]],
+      faqs: [
+        { q: "What is the formula for volume of a sphere?", a: `The formula is ${formula("V = 4/3&pi;r<sup>3</sup>")}.` },
+        { q: "How do I find sphere volume from diameter?", a: `Divide diameter by 2 to get radius, then use ${formula("V = 4/3&pi;r<sup>3</sup>")}.` },
+        { q: "What units does sphere volume use?", a: "Sphere volume uses cubic units." }
+      ]
+    },
+    {
+      slug: "sphere-surface-area-formula",
+      h1: "Sphere Surface Area Formula",
+      title: "Sphere Surface Area Formula with Examples",
+      description: "Learn the sphere surface area formula SA = 4 pi r squared, reverse radius formulas, examples, practice, and a calculator.",
+      intro: "Use the sphere surface area formula to find the outside area of a sphere from radius or diameter.",
+      directAnswerTitle: "What is the sphere surface area formula?",
+      directAnswer: `The sphere surface area formula is ${formula("SA = 4&pi;r<sup>2</sup>")}, where r is radius. Surface area uses square units because it measures the outside area, not the space inside.`,
+      tableTitle: "Sphere surface area formulas",
+      formulaRows: [
+        ["Surface area from radius", formula("SA = 4&pi;r<sup>2</sup>"), "Use when radius is known."],
+        ["Surface area from diameter", formula("SA = 4&pi;(d / 2)<sup>2</sup>"), "Use when diameter is known."],
+        ["Radius from surface area", formula("r = &radic;(SA / 4&pi;)"), "Use to solve backwards from surface area."],
+        ["Diameter from surface area", formula("d = 2&radic;(SA / 4&pi;)"), "Use when surface area is known."]
+      ],
+      method: [
+        "Convert diameter to radius if needed.",
+        `Square the radius, then multiply by ${formula("4&pi;")}.`,
+        "Use square units for the answer.",
+        "For reverse problems, divide surface area by 4 pi and take the square root."
+      ],
+      calculator: "sphere",
+      calculatorTitle: "Sphere Surface Area Calculator",
+      calculatorIntro: "Enter radius, diameter, volume, or surface area to calculate sphere measurements with steps.",
+      cardKey: "sphere",
+      diagram: "sphere",
+      examples: [
+        { title: "Surface area from radius", steps: ["Given r = 7 cm.", `Use ${formula("SA = 4&pi;r<sup>2</sup>")}.`, `SA = 196&pi; &asymp; 615.75 cm<sup>2</sup>.`] },
+        { title: "Surface area from diameter", steps: ["Given d = 16 ft.", `First use ${formula("r = d / 2")}, so r = 8 ft.`, `SA = 256&pi; &asymp; 804.25 ft<sup>2</sup>.`] },
+        { title: "Radius from surface area", steps: ["Given SA = 100&pi; in<sup>2</sup>.", `Use ${formula("r = &radic;(SA / 4&pi;)")}.`, "r = &radic;(25) = 5 in."] }
+      ],
+      mistakes: ["Using r cubed instead of r squared.", "Using diameter as radius.", "Writing surface area in cubic units."],
+      practice: [
+        { q: "Find surface area when r = 5 m.", a: `SA = 100&pi; &asymp; 314.16 m<sup>2</sup>.` },
+        { q: "Find surface area when d = 18 cm.", a: `r = 9 cm, so SA = 324&pi; &asymp; 1,017.88 cm<sup>2</sup>.` },
+        { q: "Find radius when SA = 64&pi; ft<sup>2</sup>.", a: "r = 4 ft." }
+      ],
+      related: [["Sphere Formulas", "/sphere-formulas/", "Review sphere diameter, volume, and area."], ["Sphere Volume Formula", "/sphere-volume-formula/", "Find space inside a sphere."], ["Surface Area Formulas", "/surface-area-formulas/", "Compare surface area formulas."]],
+      faqs: [
+        { q: "What is the formula for surface area of a sphere?", a: `The formula is ${formula("SA = 4&pi;r<sup>2</sup>")}.` },
+        { q: "How do I find radius from sphere surface area?", a: `Use ${formula("r = &radic;(SA / 4&pi;)")}.` },
+        { q: "Does sphere surface area use square units?", a: "Yes. Surface area uses square units." }
+      ]
+    },
+    {
+      slug: "rectangular-prism-volume-formula",
+      h1: "Rectangular Prism Volume Formula",
+      title: "Rectangular Prism Volume Formula for Boxes",
+      description: "Learn the rectangular prism volume formula V = lwh, reverse formulas for height, width, and length, examples, practice, and a calculator.",
+      intro: "Use the rectangular prism volume formula to find the space inside a box-shaped solid.",
+      directAnswerTitle: "What is the rectangular prism volume formula?",
+      directAnswer: `The rectangular prism volume formula is ${formula("V = lwh")}, where l is length, w is width, and h is height. It is also the box volume formula and uses cubic units.`,
+      tableTitle: "Rectangular prism volume formulas",
+      formulaRows: [
+        ["Volume from dimensions", formula("V = lwh"), "Use when length, width, and height are known."],
+        ["Height from volume", formula("h = V / lw"), "Use when volume, length, and width are known."],
+        ["Width from volume", formula("w = V / lh"), "Use when volume, length, and height are known."],
+        ["Length from volume", formula("l = V / wh"), "Use when volume, width, and height are known."]
+      ],
+      method: [
+        "Check that length, width, and height use the same unit.",
+        `Multiply the three dimensions using ${formula("V = lwh")}.`,
+        "For reverse problems, divide volume by the product of the two known dimensions.",
+        "Write the answer with cubic units for volume."
+      ],
+      calculator: "rectangular-prism",
+      calculatorTitle: "Rectangular Prism Volume Calculator",
+      calculatorIntro: "Enter length, width, and height to calculate rectangular prism volume and surface area.",
+      cardKey: "rectangular-prism",
+      diagram: "prism",
+      examples: [
+        { title: "Volume from dimensions", steps: ["Given l = 9 cm, w = 5 cm, h = 4 cm.", `Use ${formula("V = lwh")}.`, `V = 9 &times; 5 &times; 4 = 180 cm<sup>3</sup>.`] },
+        { title: "Height from volume", steps: ["Given V = 240 ft<sup>3</sup>, l = 12 ft, w = 5 ft.", `Use ${formula("h = V / lw")}.`, "h = 240 / 60 = 4 ft."] },
+        { title: "Width from volume", steps: ["Given V = 144 in<sup>3</sup>, l = 8 in, h = 6 in.", `Use ${formula("w = V / lh")}.`, "w = 144 / 48 = 3 in."] }
+      ],
+      mistakes: ["Adding dimensions instead of multiplying them.", "Mixing units before multiplying.", "Writing volume in square units."],
+      practice: [
+        { q: "Find volume when l = 10, w = 6, h = 3.", a: "V = 180 cubic units." },
+        { q: "Find height when V = 96 cm<sup>3</sup>, l = 8 cm, w = 4 cm.", a: "h = 3 cm." },
+        { q: "Find length when V = 210 ft<sup>3</sup>, w = 5 ft, h = 7 ft.", a: "l = 6 ft." }
+      ],
+      related: [["Rectangular Prism Formulas", "/rectangular-prism-formulas/", "Review volume and surface area."], ["Rectangle Area Formula", "/rectangle-area-formula/", "Review base area."], ["Volume Formulas", "/volume-formulas/", "Compare 3D volume formulas."]],
+      faqs: [
+        { q: "What is the formula for volume of a rectangular prism?", a: `The formula is ${formula("V = lwh")}.` },
+        { q: "Is rectangular prism volume the same as box volume?", a: "Yes. A box-shaped solid uses the rectangular prism volume formula." },
+        { q: "What units does rectangular prism volume use?", a: "Volume uses cubic units." }
+      ]
+    }
+  ];
+
+  return pages.map((page) => {
+    const hydrated = {
+      ...common,
+      primaryKeyword: page.primaryKeyword || page.h1.toLowerCase(),
+      ...page
+    };
+    return {
+      ...hydrated,
+      body: keywordBody(hydrated)
+    };
+  });
 }
 
 function extraExamples(type) {
@@ -2167,6 +2882,8 @@ async function writePage(page) {
 async function writeGeometryRedirect() {
   const dir = path.join(root, "geometry-formulas");
   await mkdir(dir, { recursive: true });
+  const title = "Geometry Formulas";
+  const description = "Geometry Formulas is now served from the homepage with formula tables, visual calculators, step-by-step examples, and practice problems.";
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -2175,9 +2892,24 @@ async function writeGeometryRedirect() {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="0; url=/">
   <meta name="robots" content="noindex, follow">
-  <meta name="description" content="Geometry Formulas is now served from the homepage with formula tables, visual calculators, step-by-step examples, and practice problems.">
+  <meta name="description" content="${description}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="${brandName}">
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:url" content="${absoluteUrl("geometry-formulas")}">
+  <meta property="og:image" content="${socialImageUrl}">
+  <meta property="og:image:type" content="${socialImage.type}">
+  <meta property="og:image:width" content="${socialImage.width}">
+  <meta property="og:image:height" content="${socialImage.height}">
+  <meta property="og:image:alt" content="${escapeHtml(socialImage.alt)}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${socialImageUrl}">
+  <meta name="twitter:image:alt" content="${escapeHtml(socialImage.alt)}">
   <link rel="canonical" href="${absoluteUrl("geometry-formulas")}">
-  <title>Geometry Formulas</title>
+  <title>${title}</title>
 </head>
 <body>
   <p><a href="/">Go to Geometry Formulas</a></p>
@@ -2213,6 +2945,9 @@ function redirectsText() {
     ["/geometry-formulas", "/", 301],
     ["/geometry-formulas/", "/", 301],
     ["/geometry-formulas/index.html", "/", 301],
+    ["/team-services", "/about/", 301],
+    ["/team-services/", "/about/", 301],
+    ["/team-services/index.html", "/about/", 301],
     ["/index.html", "/", 301]
   ];
 
@@ -2248,12 +2983,14 @@ function headersText() {
 }
 
 function sitemapXml() {
-  const urls = pages.map((page) => `
+  const urls = pages
+    .filter((page) => page.sitemap !== false && !page.noindex)
+    .map((page) => `
   <url>
     <loc>${absoluteUrl(page.slug)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>${page.slug === "geometry-formulas" ? "1.0" : "0.8"}</priority>
+    <priority>${page.priority || (page.slug === "geometry-formulas" ? "1.0" : "0.8")}</priority>
   </url>`).join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
