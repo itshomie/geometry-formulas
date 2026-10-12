@@ -11,6 +11,7 @@ const brandAlternateName = "geometry formulas";
 const companyName = "Blue Core Technologies LLC";
 const contactEmailDisplay = "Ding [at] bluecoretechnologiesllc [dot] com";
 const googleAnalyticsId = "G-MTGR0VENZ1";
+const adsensePublisherId = "pub-5411294301280436";
 const socialImage = {
   path: "/assets/img/geometry-formulas-og.png",
   width: 1200,
@@ -199,6 +200,7 @@ for (const page of pages) {
 await writeGeometryRedirect();
 await writeText("_redirects", redirectsText());
 await writeText("_headers", headersText());
+await writeText("ads.txt", `google.com, ${adsensePublisherId}, DIRECT, f08c47fec0942fa0\n`);
 await writeText("robots.txt", `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`);
 await writeText("sitemap.xml", sitemapXml());
 
@@ -745,6 +747,7 @@ function pageShell(page, body) {
 <html lang="en">
 <head>
   ${googleTag()}
+  ${adsenseTag()}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(page.title)}</title>
@@ -829,6 +832,11 @@ function pageShell(page, body) {
   </footer>
 </body>
 </html>`;
+}
+
+function adsenseTag() {
+  return `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${adsensePublisherId}"
+     crossorigin="anonymous"></script>`;
 }
 
 function googleTag() {
@@ -2195,6 +2203,7 @@ async function writeGeometryRedirect() {
 <html lang="en">
 <head>
   ${googleTag()}
+  ${adsenseTag()}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="refresh" content="0; url=/">
@@ -2278,6 +2287,10 @@ function headersText() {
   Cache-Control: public, max-age=3600
 
 /robots.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/ads.txt
   Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=3600
 
