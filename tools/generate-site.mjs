@@ -1,4 +1,4 @@
-import { cp, copyFile, mkdir, writeFile } from "node:fs/promises";
+import { cp, copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import katex from "katex";
@@ -53,7 +53,6 @@ const calculatorLinks = [
 
 const companyLinks = [
   ["About", "/about/"],
-  ["Team & Services", "/team-services/"],
   ["Contact", "/contact/"]
 ];
 
@@ -193,6 +192,7 @@ const pages = [
   ...trustPages()
 ];
 
+await rm(path.join(root, "team-services"), { recursive: true, force: true });
 await writeAssets();
 for (const page of pages) {
   await writePage(page);
@@ -1001,7 +1001,6 @@ function contactEmailText() {
 function trustPages() {
   return [
     aboutPage(),
-    teamServicesPage(),
     contactPage(),
     privacyPolicyPage(),
     termsOfUsePage()
@@ -1031,38 +1030,6 @@ function aboutPage() {
     {
       title: "Who operates this website",
       body: `<p>Geometry Formulas is operated by ${companyName}. For questions, corrections, or feedback, use the <a href="/contact/">contact page</a>.</p>`
-    }
-  ]);
-
-  return { ...page, body };
-}
-
-function teamServicesPage() {
-  const page = {
-    slug: "team-services",
-    h1: "Team & Services",
-    title: "Team & Services | Geometry Formulas",
-    description: "Learn about the Geometry Formulas team, educational content services, calculator planning, and contact information.",
-    intro: "Our work focuses on clear educational content, visual math references, and lightweight web calculators for student learning.",
-    kicker: "Team & Services"
-  };
-
-  const body = infoBody(page, [
-    {
-      title: "Our team focus",
-      body: `<p>The Geometry Formulas team focuses on turning common geometry topics into useful study pages. We prioritize accuracy, clear diagrams, fast pages, and calculators that show the formula and the steps behind each answer.</p>`
-    },
-    {
-      title: "Educational content services",
-      body: `<p>${companyName} can support educational web content planning, formula reference pages, calculator concepts, content structure, and search-focused information architecture for learning websites.</p>`
-    },
-    {
-      title: "What we do not provide",
-      body: `<p>The website does not provide private tutoring, graded homework completion, legal advice, or financial advice. Geometry calculators are educational tools and should be checked against class instructions when precision or rounding rules matter.</p>`
-    },
-    {
-      title: "Service inquiries",
-      body: `<p>For service or partnership inquiries, use the <a href="/contact/">contact page</a> with a short description of your project, timeline, and website or organization.</p>`
     }
   ]);
 
@@ -2261,6 +2228,9 @@ function redirectsText() {
     ["/geometry-formulas", "/", 301],
     ["/geometry-formulas/", "/", 301],
     ["/geometry-formulas/index.html", "/", 301],
+    ["/team-services", "/about/", 301],
+    ["/team-services/", "/about/", 301],
+    ["/team-services/index.html", "/about/", 301],
     ["/index.html", "/", 301]
   ];
 

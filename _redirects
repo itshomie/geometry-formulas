@@ -6,6 +6,9 @@ https://geometry-formulas.pages.dev/* https://geometry-formulas.com/:splat 301
 /geometry-formulas / 301
 /geometry-formulas/ / 301
 /geometry-formulas/index.html / 301
+/team-services /about/ 301
+/team-services/ /about/ 301
+/team-services/index.html /about/ 301
 /index.html / 301
 /area-formulas /area-formulas/ 301
 /area-formulas/index.html /area-formulas/ 301
@@ -45,8 +48,6 @@ https://geometry-formulas.pages.dev/* https://geometry-formulas.com/:splat 301
 /geometry-solver/index.html /geometry-solver/ 301
 /about /about/ 301
 /about/index.html /about/ 301
-/team-services /team-services/ 301
-/team-services/index.html /team-services/ 301
 /contact /contact/ 301
 /contact/index.html /contact/ 301
 /privacy-policy /privacy-policy/ 301
